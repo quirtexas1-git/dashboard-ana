@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Dashboard ANA</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="js/highcharts.js"></script>
+<script src="js/exporting.js"></script>
+<script src="js/accessibility.js"></script>
+<script src="js/map.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/pe/pe-all.js"></script>
+
+
+<style>
+/* Forzamos que la tabla y sus componentes no tengan fondo */
+.table-ana-dark, 
+.table-ana-dark tbody, 
+.table-ana-dark tr, 
+.table-ana-dark td, 
+.table-ana-dark th {
+    background-color: transparent !important; /* Elimina cualquier color de fondo */
+    background: none !important;
+}
+
+/* Opcional: Si quieres que al pasar el mouse (hover) se ilumine un poquito 
+   como en la lista de usuarios, puedes usar una opacidad muy baja */
+.table-ana-dark tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important; 
+}
+
+#mapFilter {
+    background-color: #1a223f !important;
+    border: 1px solid #2d375a !important;
+    color: #d633ff !important;
+    font-weight: bold;
+}
+
+#dept-detail-card {
+    border-left: 4px solid #d633ff;
+    animation: fadeInRight 0.5s ease;
+}
+
+@keyframes fadeInRight {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* Estilo de los botones del mapa */
+.highcharts-map-navigation {
+    padding: 10px;
+}
+/* Centrar y limitar el ancho del contenido */
+.content { 
+    margin-left: 260px; 
+    padding: 20px; 
+    display: flex;
+    justify-content: center; /* Centra el contenedor interno */
+}
+
+.main-container {
+    width: 100%;
+    max-width: 1400px; /* AQUÍ ajustas qué tan "angosto" lo quieres */
+    margin: 0 auto;    /* Asegura el centrado */
+}
+
+/* Ajuste para que el mapa no se desborde si el contenedor es pequeño */
+.map { 
+    height: 500px; 
+    width: 100%; 
+}
+
+/* Tipografía y Títulos */
+.section-title {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.section-subtitle {
+    color: #9aa4c7;
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+/* Botón Exportar (Estilo transparente/outline) */
+.btn-export {
+    background: rgba(26, 34, 63, 0.4);
+    border: 1px solid #2d375a;
+    color: #ffffff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.btn-export:hover {
+    background: #2d375a;
+    border-color: #4f46e5;
+}
+
+/* Botón Crear Reporte (Estilo degradado morado) */
+.btn-create {
+    background: linear-gradient(90deg, #c026d3 0%, #a21caf 100%);
+    border: none;
+    color: #ffffff;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 15px rgba(192, 38, 211, 0.3);
+}
+
+.btn-create:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(192, 38, 211, 0.4);
+    background: linear-gradient(90deg, #d946ef 0%, #c026d3 100%);
+}
+
+.btn-create:active {
+    transform: translateY(0);
+}
+
+/* TUS ESTILOS ORIGINALES */
+body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
+.sidebar { width: 260px; height: 100vh; position: fixed; background: linear-gradient(180deg,#050f3a,#020c2b); padding: 20px; }
+.sidebar a { display: block; padding: 10px; color: #9aa4c7; border-radius: 8px; margin-bottom: 5px; text-decoration: none; }
+.sidebar a.active { background: linear-gradient(90deg,#9333ea,#a855f7); color: white; }
+.content { margin-left: 260px; padding: 20px; }
+.card-dark { background: #07143a; border-radius: 14px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.kpi { border-radius: 12px; padding: 16px; color: white; font-weight: 500; }
+.kpi small { opacity: 0.7; }
+.kpi-total { background: linear-gradient(135deg,#4f46e5,#9333ea); }
+.kpi-ok { background: linear-gradient(135deg,#16a34a,#22c55e); }
+.kpi-ok-ok { background: linear-gradient(135deg,#093b1c,#0a692d); }
+.kpi-bad { background: linear-gradient(135deg,#dc2626,#ef4444); }
+.kpi-bad-bad { background: linear-gradient(135deg,#5e1d1d,#ef4444); }
+.kpi-warn { background: linear-gradient(135deg,#d97706,#f59e0b); }
+.kpi-blue { background: linear-gradient(135deg,#1d0491,#2d30f5); }
+.kpi-neutral { background: linear-gradient(135deg,#374151,#6b7280); }
+.chart { height: 280px; }
+.map { height: 600px; } /* Ajustado para que se vea completo */
+.user-list li { display: flex; justify-content: space-between; padding: 6px 0; }
+
+
+.kpi2 { 
+    border-radius: 12px; 
+    padding: 30px 20px;
+    color: white; 
+    font-weight: 500; 
+    justify-content: center;
+    min-height: 160px;
+}
+
+.kpi2 small {
+    font-size: 0.85rem;
+    color: #9aa4c7;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.kpi2 h4 {
+    font-size: 2.2rem; /* Número más grande para llenar el espacio */
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+}
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    background: #070d19; /* Azul muy oscuro de la imagen */
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+    border-right: 1px solid #1a223f;
+    position: fixed;
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    margin-bottom: 30px;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+}
+
+/* Buscador */
+.sidebar-search {
+    padding: 0 20px;
+    margin-bottom: 25px;
+}
+.search-box {
+    background: rgba(26, 34, 63, 0.5);
+    border: 1px solid #1a223f;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    padding: 8px 15px;
+}
+.search-box input {
+    background: transparent;
+    border: none;
+    color: #9aa4c7;
+    margin-left: 10px;
+    outline: none;
+    font-size: 0.9rem;
+}
+
+/* Items del Menú */
+.menu-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #9aa4c7;
+    transition: 0.3s;
+}
+.menu-item:hover, .menu-item.active {
+    color: #ffffff;
+}
+.menu-icon { margin-right: 15px; }
+.active-icon { color: #d633ff; } /* Morado brillante */
+
+/* Submenú */
+.submenu {
+    display: flex;
+    flex-direction: column;
+    padding-left: 50px; /* Alineación con el texto superior */
+}
+.submenu-item {
+    padding: 10px 0;
+    color: #9aa4c7;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: 0.3s;
+}
+.submenu-item:hover { color: #ffffff; }
+.submenu-item.active {
+    color: #ffffff;
+    position: relative;
+    /* Efecto de borde izquierdo brillante de la imagen */
+    border-left: 3px solid #d633ff; 
+    padding-left: 15px;
+    margin-left: -18px;
+    background: linear-gradient(90deg, rgba(214, 51, 255, 0.1) 0%, transparent 100%);
+}
+
+/* Footer de Usuario */
+.sidebar-footer {
+    margin-top: auto;
+    padding: 20px;
+    border-top: 1px solid #1a223f;
+}
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #5e5ce6;
+}
+.user-info2 { display: flex; flex-direction: column; }
+.user-name2 { font-size: 0.9rem; font-weight: bold; }
+.user-role { font-size: 0.75rem; color: #9aa4c7; }
+.arrow-small { margin-left: auto; color: #9aa4c7; font-size: 0.8rem; }
+
+
+/* NUEVOS ESTILOS PARA LAS BARRAS DE SEDES */
+.progress-bar-custom { background: #1a223f; height: 8px; border-radius: 10px; margin-bottom: 15px; }
+.progress-fill { height: 100%; border-radius: 10px; }
+
+/* Estilos para la lista de usuarios tipo Avatar */
+
+/* Indica que la lista es interactiva */
+.user-item {
+    cursor: pointer;
+    transition: background 0.2s ease;
+    padding: 8px;
+    border-radius: 8px;
+}
+
+.user-item:hover {
+    background: rgba(214, 51, 255, 0.1); /* Sutil fondo morado */
+}
+
+/* Clase para resaltar el usuario seleccionado en la lista */
+.user-item.active-selection {
+    background: rgba(214, 51, 255, 0.2);
+    border-left: 3px solid #d633ff;
+}
+
+.user-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.user-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.user-item:last-child {
+    border-bottom: none;
+}
+
+.user-info2 {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 15px;
+    border: 2px solid #a855f7; /* Círculo morado de la imagen */
+    object-fit: cover;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.user-email {
+    font-size: 0.8rem;
+    color: #9aa4c7; /* Color gris de la referencia */
+}
+
+.user-value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #ffffff;
+}
+/* Estilos para el listado de Sedes */
+.sede-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sede-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sede-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sede-name {
+    font-size: 0.9rem;
+    color: #9aa4c7;
+    font-weight: 500;
+}
+
+.sede-percentage {
+    font-size: 0.9rem;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Contenedor de la barra */
+.progress-custom {
+    background: #1a223f;
+    height: 6px;
+    border-radius: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+/* Relleno con los mismos degradados que tus KPIs */
+.progress-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Badge de tendencia verde */
+.badge-trend {
+    font-size: 0.45em;
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-left: 12px;
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+.sede-stats {
+    display: flex;
+    gap: 12px;
+    align-items: baseline;
+}
+
+.sede-count {
+    font-size: 0.95rem;
+    color: #ffffff; /* Cantidad en blanco para resaltar */
+    font-weight: 700;
+}
+
+.sede-percentage {
+    font-size: 0.8rem;
+    color: #9aa4c7; /* Porcentaje en gris como dato secundario */
+    font-weight: 400;
+}
+/* Scrollbar elegante para la lista de departamentos */
+.sede-list::-webkit-scrollbar {
+    width: 4px;
+}
+.sede-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.sede-list::-webkit-scrollbar-thumb {
+    background: #1a223f;
+    border-radius: 10px;
+}
+.sede-list::-webkit-scrollbar-thumb:hover {
+    background: #4f46e5;
+}
+/* Contenedor principal de filtros */
+.filters-container {
+    padding: 10px 0;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-label {
+    font-size: 0.75rem;
+    color: #9aa4c7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* Wrapper para el icono personalizado */
+.select-wrapper {
+    position: relative;
+    min-width: 200px;
+}
+
+.custom-select {
+    width: 100%;
+    background: #1a223f; /* Mismo color que los inputs de la sidebar */
+    border: 1px solid #2d375a;
+    color: #ffffff;
+    padding: 10px 35px 10px 15px;
+    border-radius: 8px;
+    appearance: none; /* Quita la flecha nativa */
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.custom-select:focus {
+    outline: none;
+    border-color: #5e5ce6;
+    box-shadow: 0 0 0 2px rgba(94, 92, 230, 0.2);
+}
+
+.select-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9aa4c7;
+    pointer-events: none;
+    font-size: 0.8rem;
+}
+
+/* Botón de reset */
+.btn-filter-reset {
+    background: #1a223f;
+    border: 1px solid #2d375a;
+    color: #9aa4c7;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-top: 20px; /* Alineado con el select, no con el label */
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-filter-reset:hover {
+    background: #2d375a;
+    color: #ffffff;
+}
+/* El resto del CSS anterior se mantiene igual */
+/* Estilo para el área de scroll de usuarios */
+.user-scroll-area::-webkit-scrollbar {
+    width: 4px;
+}
+
+.user-scroll-area::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.user-scroll-area::-webkit-scrollbar-thumb {
+    background: #1a223f; /* Color sobrio que combina con el fondo */
+    border-radius: 10px;
+}
+
+.user-scroll-area::-webkit-scrollbar-thumb:hover {
+    background: #5e5ce6; /* Resalte sutil al pasar el mouse */
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo">
+            <img src="images/logo-ana.png" alt="Logo" style="width: 50px; margin-right: 20px;">
+            <span>Dashboard ANA</span>
+        </div>
+        <i class="fas fa-code-branch" style="color: #9aa4c7; font-size: 0.8em;"></i>
+    </div>
+
+
+    <div class="sidebar-menu">
+        <div class="menu-group">
+            <div class="menu-item main-menu" id="toggleDashboard">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-home menu-icon active-icon"></i>
+                    <span>Dashboard</span>
+                </div>
+                <i class="fas fa-chevron-down arrow-icon"></i>
+            </div>
+            
+            <div class="submenu" id="dashboardSubmenu">
+                <a href="#" class="submenu-item">Todas las Páginas</a>
+                <a href="#" class="submenu-item active">Ingresados Ventanilla</a>
+                <a href="#" class="submenu-item">Ingresados por Intercambio</a>
+                <a href="#" class="submenu-item">Ingresados Interno</a>
+                <a href="#" class="submenu-item">Doc. Emitidos</a>
+                <a href="#" class="submenu-item">Notificaciones Físicas</a>
+                <a href="#" class="submenu-item">Notificaciones Digitales</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-footer">
+        <div class="user-profile">
+            <img src="images/user-avatar.png" alt="Dora Torres" class="avatar">
+            <div class="user-info2">
+                <span class="user-name2">Dora Torres</span>
+                <span class="user-role">Jefe - UATD</span>
+            </div>
+            <i class="fas fa-chevron-right arrow-small"></i>
+        </div>
+    </div>
+</div>
+
+
+<div class="content">
+
+    <div class="main-container">
+        <div class="dashboard-header d-flex justify-content-between align-items-center mb-4">
+            <div class="header-text">
+                <h2 class="section-title">Documentos ingresados por ventanilla</h2>
+                <p class="section-subtitle">Este dashboard consolida todos los documentos ingresados a través de las ventanillas físicas y virtuales a nivel nacional.</p>  
+            </div>    
+            <div class="header-actions d-flex gap-3 align-items-center">
+                <button class="btn-export">
+                    Exportar datos <i class="fas fa-arrow-down ms-2" style="font-size: 0.8rem;"></i>
+                </button>
+                
+            </div>
+        </div>
+        <div class="row mb-4">
+        <div class="col-12">
+            <div class="filters-container d-flex gap-3 align-items-center">                
+                <div class="filter-group">
+                    <div class="filter-group">
+                        <label class="filter-label">Periodo</label>
+                        <div class="select-wrapper">
+                            <select id="yearFilter" class="custom-select">
+                                <option value="2026">2026</option>
+                                <option value="2025">2025</option>
+                            </select>
+                            <i class="fas fa-calendar-alt select-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+       <div class="row g-3 my-3">
+            <div class="col-md-3"><div class="kpi kpi-total"><small>Total</small><h4 id="kpi-total">50.8K</h4></div></div>
+            <div class="col-md-3"><div class="kpi kpi-blue"><small>Ingresados</small><h4 id="kpi-ingresados">0.6K</h4></div></div>
+            <div class="col-md-3"><div class="kpi kpi-ok"><small>Atendidos</small><h4 id="kpi-atendidos">41.3K</h4></div></div>
+            <div class="col-md-3"><div class="kpi kpi-bad"><small>Pendientes</small><h4 id="kpi-pendientes">8.5K</h4></div></div>
+        </div>
+        <div class="row g-3 my-3">
+            <div class="col-md-3"><div class="kpi kpi-ok-ok"><small>Atendido a Tiempo</small><h4 id="kpi-atiempo">50.8K</h4></div></div>
+            <div class="col-md-3"><div class="kpi kpi-bad-bad"><small>Fuera del Plazo</small><h4 id="kpi-fplazo">41.3K</h4></div></div>  
+            <div class="col-md-3"><div class="kpi kpi-warn"><small>Observados</small><h4 id="kpi-observados">0.6K</h4></div></div>
+            <div class="col-md-3"><div class="kpi kpi-neutral"><small>Anulados</small><h4 id="kpi-anulados">0.4K</h4></div></div>
+        </div>
+        
+        <div class="card-dark position-relative">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6>Ingresados - Distribución Geográfica</h6>
+                <select id="mapFilter" class="form-select form-select-sm bg-dark text-white border-secondary" style="width: auto;">
+                    <option value="TODOS">TODOS</option>
+                    <option value="TUPA">TUPA</option>
+                    <option value="NO TUPA">NO TUPA</option>
+                </select>
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div id="mapChart" style="width: 100%; height: 600px;"></div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div id="dept-detail-card" class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
+                        <h5 id="dept-title" class="text-primary">Perú (General)</h5>
+                        <hr class="border-secondary">
+                        <table class="table table-borderless text-white mb-2">
+                            <tbody id="dept-stats-body">
+                                </tbody>
+                        </table>
+
+                        <div id="dept-pie-container" style="margin-top: 10px;">
+                            <div id="dept-pie-chart" style="width: 100%; height: 200px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="fas fa-map-marker-alt text-primary"></i>
+                    <h4 class="m-0 text-white" style="font-size: 1.2rem;">
+                        Análisis Detallado: <span id="selected-dept-name" class="text-info">Perú (General)</span>
+                    </h4>
+                </div>
+                <hr class="border-secondary opacity-25">
+            </div>
+        </div>
+
+
+        <div class="row g-3 my-3">
+            <div class="col-12">
+                <div class="card-dark p-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="text-white m-0">Promedio de Horas de Atención por Mes</h6>
+                        <div class="select-wrapper">
+                            <select id="slaFilter" class="custom-select" style="width: 150px; font-size: 0.8rem;">
+                                <option value="todos">Todos</option>
+                                <option value="tupa">TUPA</option>
+                                <option value="notupa">NO TUPA</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="slaLineChart" style="height: 280px; width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+
+
+        </br>
+        <div class="row g-3 d-flex align-items-stretch mb-3">
+            
+            <div class="col-lg-8 d-flex flex-column">
+                <div class="card-dark mb-3 flex-fill">
+                    <h6>Ingreso Mensual</h6>
+                    <div id="lineChart" style="height: 250px;"></div>
+                </div>
+                <div class="card-dark flex-fill">
+                    <h6>Ingreso por tipo de documento</h6>
+                    <div id="barChart" style="height: 250px;"></div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 d-flex">
+                <div id="dashboard-stats-container" class="card-dark p-3 flex-fill d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="text-white m-0" style="font-size: 1rem;">Análisis Operativo</h5>
+                        <select id="monthFilter" class="form-select form-select-sm shadow-none" 
+                                style="width: 110px; background-color: #1a1d2d; color: #fff; border: 1px solid #343a40;">
+                            <option value="4" selected>Abril</option>
+                        </select>
+                    </div>
+
+                    <div class="flex-fill d-flex flex-column mb-3">
+                        <h6 class="small mb-1">ESTADOS</h6>
+                        <div class="d-flex align-items-center">
+                            <div id="pieChart" style="height: 220px; width: 70%;"></div>
+                            <div class="custom-legend small ps-2" style="width: 30%; line-height: 1.2;">
+                                <div><span style="color:#7E129B">●</span> Archiva</div>
+                                <div><span style="color:#A134D0">●</span> Calidad</div>
+                                <div><span style="color:#C26DF2">●</span> Derivado</div>
+                                <div><span style="color:#D69DF9">●</span> Obs.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary opacity-25 my-2">
+
+                    <div class="flex-fill d-flex flex-column">
+                        <h6 class="small mb-1">TUPA / NO TUPA</h6>
+                        <div class="d-flex align-items-center">
+                            <div id="donutChart" style="height: 220px; width: 70%;"></div>
+                            <div class="custom-legend small ps-2" style="width: 30%;">
+                                <div><span style="color:#00c4ff">●</span> TUPA</div>
+                                <div><span style="color:#5e5ce6">●</span> NO TUPA</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card-dark p-4 my-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h6 class="text-white m-0">TEMAS RELACIONADOS (CLASIFICACIÓN POR DIRECCIÓN/OFICINA)</h6>
+                    <small class="">Desglose de expedientes y cumplimiento de plazos</small>
+                </div>
+                <select id="officeMonthFilter" class="form-select form-select-sm shadow-none" 
+                        style="width: 160px; background: #1a1d2d; color: #fff; border: 1px solid #343a40;">
+                    </select>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0" style="background: transparent; font-size: 0.9rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #2d375a; color: #9aa4c7;">
+                            <th class="py-3">Dirección / Oficina</th>
+                            <th class="py-3 text-center">Cantidad</th>
+                            <th class="py-3 text-center">% del total</th>
+                            <th class="py-3 text-center">Fuera de plazo</th>
+                        </tr>
+                    </thead>
+                    <tbody id="officeTableBody">
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+        <div class="row g-3">
+            <div class="col-lg-8">
+                <div class="card-dark">
+                    <h6 class="mb-4">Validaciones por usuario: Ingresados</h6>
+                    <div class="user-scroll-area" style="max-height: 350px; overflow-y: auto; padding-right: 10px;">
+                        <ul class="user-list">
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Erick Pino</span>
+                                        <span class="user-email">epino@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">50</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Carlos Gonzales</span>
+                                        <span class="user-email">cgonzales@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">40</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">José Peña</span>
+                                        <span class="user-email">jpena@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Guillermo Panta</span>
+                                        <span class="user-email">gpanta@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Alicia Mendoza</span>
+                                        <span class="user-email">amendoza@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Carlos Meza</span>
+                                        <span class="user-email">cmeza@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Javier Rojas</span>
+                                        <span class="user-email">jrojas@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Alejandra Muñoz</span>
+                                        <span class="user-email">amunoz@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Oscar Gamarra</span>
+                                        <span class="user-email">ogamarra@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                            <li class="user-item">
+                                <div class="user-info">                
+                                    <div class="user-details">
+                                        <span class="user-name">Jesus Vega</span>
+                                        <span class="user-email">jvega@ana.gob.pe</span>
+                                    </div>
+                                </div>
+                                <span class="user-value">20</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div id="user-label-container" class="mb-2">
+                    <span id="selected-user-name" style="color: #d633ff; font-weight: 600; font-size: 0.85rem; text-transform: uppercase;"></span>
+                </div>
+                
+                <div class="card-dark mb-3 text-center p-3">
+                    <small class="">Tiempo Promedio Validación</small>
+                    <h3 id="avg-time" class="text-white mt-1">-- horas</h3>
+                </div>
+
+                <div class="row g-2">
+                    <div class="col-6">
+                        <div class="kpi2 kpi-ok-ok">
+                            <small>Atendido a Tiempo</small>
+                            <h4 id="ontime-val" class="m-0">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="kpi2 kpi-bad-bad">
+                            <small>Fuera del Plazo</small>
+                            <h4 id="late-val" class="m-0">0</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+// Variable global para el gráfico de pie para poder actualizarlo
+let miniPieChart;
+let estadosChart, tupaChart;
+let peruMapChart;
+let slaChart;
+
+
+// Datos base para la jerarquía
+const officeStructure = [
+    { id: 'OA', name: 'Oficina de Administración', children: ['OA-UATD', 'OA-OPP'] },
+    { id: 'DSNIRH', name: 'DSNIRH', children: [] },
+    { id: 'DCERH', name: 'DCERH', children: [] },
+    { id: 'DPDRH', name: 'DPDRH', children: [] }
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    initOfficeMonthFilter();
+    renderOfficeTable();
+
+    // Escuchar cambios en el filtro de meses propio
+    document.getElementById('officeMonthFilter').addEventListener('change', renderOfficeTable);
+    // También debe reaccionar al cambio de año global
+    document.getElementById('yearFilter').addEventListener('change', () => {
+        initOfficeMonthFilter();
+        renderOfficeTable();
+    });
+});
+
+function initOfficeMonthFilter() {
+    const filter = document.getElementById('officeMonthFilter');
+    const year = parseInt(document.getElementById('yearFilter').value);
+    const now = new Date();
+    const currentYear = 2026; // Según tu contexto actual
+    const currentMonth = 2; // Marzo
+
+    const mesesFull = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    const limit = (year === currentYear) ? currentMonth + 1 : 12;
+
+    let options = '<option value="todos">Todos los meses</option>';
+    for (let i = 0; i < limit; i++) {
+        options += `<option value="${i}">${mesesFull[i]}</option>`;
+    }
+    filter.innerHTML = options;
+}
+
+function renderOfficeTable() {
+    const tbody = document.getElementById('officeTableBody');
+    tbody.innerHTML = '';
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+
+    officeStructure.forEach(dir => {
+        const totalDir = rand(100, 500);
+        const lateDir = rand(5, 25);
+        const hasChildren = dir.children.length > 0;
+
+        // Fila Principal (Dirección)
+        const row = document.createElement('tr');
+        row.style.cursor = hasChildren ? 'pointer' : 'default';
+        row.innerHTML = `
+            <td class="py-3 text-white">
+                ${hasChildren ? `<i class="fas fa-chevron-right me-2 text-primary" id="icon-${dir.id}"></i>` : '<span class="me-4"></span>'}
+                ${dir.name}
+            </td>
+            <td class="text-center">${totalDir}</td>
+            <td class="text-center">${rand(10, 30)}%</td>
+            <td class="text-center">
+                <span class="badge rounded-pill" style="background: rgba(255, 77, 77, 0.1); color: #ff4d4d;">${lateDir}</span>
+            </td>
+        `;
+
+        if (hasChildren) {
+            row.onclick = () => toggleSubTable(dir.id);
+        }
+        tbody.appendChild(row);
+
+        // Filas de Oficina (Sub-nivel)
+        dir.children.forEach(sub => {
+            const subRow = document.createElement('tr');
+            subRow.className = `d-none sub-${dir.id}`;
+            subRow.style.background = 'rgba(45, 55, 90, 0.2)';
+            subRow.innerHTML = `
+                <td class="py-2 ps-5  small">${sub}</td>
+                <td class="text-center small">${rand(20, 80)}</td>
+                <td class="text-center small">${rand(2, 8)}%</td>
+                <td class="text-center small">
+                    <span class="badge rounded-pill" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;">${rand(1, 5)}</span>
+                </td>
+            `;
+            tbody.appendChild(subRow);
+        });
+    });
+}
+
+function toggleSubTable(dirId) {
+    const subRows = document.querySelectorAll(`.sub-${dirId}`);
+    const icon = document.getElementById(`icon-${dirId}`);
+    
+    subRows.forEach(row => row.classList.toggle('d-none'));
+    icon.classList.toggle('fa-chevron-down');
+    icon.classList.toggle('fa-chevron-right');
+}
+
+
+
+
+// Generador de datos (5k - 10k)
+const getRandVal = () => Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
+function initSlaChart() {
+    slaChart = Highcharts.chart('slaLineChart', {
+        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+        title: { text: '' },
+        xAxis: { 
+            categories: ['Ene', 'Feb', 'Mar'], // Dinámico según el año
+            labels: { style: { color: '#9aa4c7' } } 
+        },
+        yAxis: {
+            gridLineColor: '#1a223f',
+            title: { text: 'Horas', style: { color: '#9aa4c7' } },
+            labels: { style: { color: '#9aa4c7' } },
+            // --- LOS UMBRALES ---
+            plotLines: [{
+                value: 72,
+                color: '#ff4d4d',
+                dashStyle: 'shortdash',
+                width: 2,
+                zIndex: 5,
+                label: { text: 'Crítico (72h)', align: 'right', style: { color: '#ff4d4d' } }
+            }, {
+                value: 48,
+                color: '#ffc107',
+                dashStyle: 'shortdash',
+                width: 2,
+                zIndex: 5,
+                label: { text: 'Advertencia (48h)', align: 'right', style: { color: '#ffc107' } }
+            }]
+        },
+        tooltip: { shared: true, backgroundColor: '#07143a', style: { color: '#fff' } },
+        plotOptions: {
+            areaspline: {
+                fillOpacity: 0.1,
+                lineWidth: 4,
+                color: '#00c4ff', // Línea principal cian
+                marker: { enabled: true, radius: 5 }
+            }
+        },
+        series: [{
+            name: 'Promedio de Atención',
+            data: [42, 55, 38] // Datos iniciales
+        }],
+        credits: { enabled: false }
+    });
+}
+// Función para actualizar específicamente el gráfico de SLA
+function updateSlaChart() {
+    if (!slaChart) return;
+
+    const year = document.getElementById('yearFilter').value;
+    const type = document.getElementById('slaFilter').value;
+    document.getElementById('slaFilter').addEventListener('change', updateSlaChart);
+
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth();
+
+    // 1. Ajustar meses según el año
+    const mesesFull = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const numMeses = (parseInt(year) === currentYear) ? currentMonth + 1 : 12;
+    const categorias = mesesFull.slice(0, numMeses);
+
+    // 2. Generar datos aleatorios basados en el filtro (TUPA suele demorar más)
+    const baseVal = type === 'tupa' ? 50 : 30;
+    const newData = Array.from({ length: numMeses }, () => Math.floor(Math.random() * 60) + baseVal);
+
+    // 3. Aplicar cambios
+    slaChart.xAxis[0].setCategories(categorias);
+    slaChart.series[0].setData(newData);
+}
+function updateDashboardData() {
+    if (!estadosChart || !tupaChart) return;
+
+    // Actualizar Estados (Pie) con tus colores morados
+    estadosChart.series[0].setData([
+        { name: 'Archiva.', y: getRandVal(), color: '#7E129B' },
+        { name: 'Calidad', y: getRandVal(), color: '#A134D0' },
+        { name: 'Derivado', y: getRandVal(), color: '#C26DF2' },
+        { name: 'Observado', y: getRandVal(), color: '#D69DF9' }
+    ]);
+
+    // Actualizar TUPA (Dona) con tus colores azul/cian
+    tupaChart.series[0].setData([
+        { name: 'TUPA', y: getRandVal(), color: '#00c4ff' },
+        { name: 'NO TUPA', y: getRandVal(), color: '#5e5ce6' }
+    ]);
+}
+function renderDeptPie(onTime, late) {
+    const total = onTime + late;
+    // Formatear el total (ej. 12.5K si es mayor a 1000)
+    const formattedTotal = total >= 1000 ? (total / 1000).toFixed(1) + 'K' : total;
+
+    if (miniPieChart) {
+        // Actualizar datos
+        miniPieChart.series[0].setData([
+            { name: 'A Tiempo', y: onTime, color: '#28a745' },
+            { name: 'Fuera de Plazo', y: late, color: '#dc3545' }
+        ]);
+        
+        // Actualizar el texto central
+        miniPieChart.setTitle({
+            text: `<span style="color: #5e5ce6; font-size: 12px;">Total</span><br/><span style="color: #ffffff; font-size: 20px; font-weight: bold;">${formattedTotal}</span>`
+        });
+
+    } else {
+        miniPieChart = Highcharts.chart('dept-pie-chart', {
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent',
+                height: 250,
+                margin: [0, 0, 40, 0] // Espacio para la leyenda
+            },
+            // Título central estilo Foto 2
+            title: {
+                text: `<span style="color: #5e5ce6; font-size: 12px;">Total</span><br/><span style="color: #ffffff; font-size: 20px; font-weight: bold;">${formattedTotal}</span>`,
+                align: 'center',
+                verticalAlign: 'middle',
+                y: 10,
+                useHTML: true
+            },
+            tooltip: {
+                backgroundColor: 'rgba(10, 16, 36, 0.9)',
+                borderColor: '#d633ff',
+                borderRadius: 8,
+                style: { color: '#ffffff' },
+                pointFormat: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)'
+            },
+            plotOptions: {
+                pie: {
+                    innerSize: '75%', // Dona delgada como la Foto 2
+                    borderRadius: 5,   // Bordes redondeados en los segmentos
+                    borderWidth: 0,
+                    dataLabels: {
+                        enabled: true,
+                        useHTML: true,
+                        // Recuadro blanco con sombra como la Foto 2
+                        format: '<b>{point.y}</b><br/>{point.percentage:.0f}%',
+                        distance: -30, // Posiciona sobre el segmento
+                        style: {
+                            color: '#000000',
+                            fontSize: '10px',
+                            fontWeight: 'normal',
+                            textOutline: 'none'
+                        },
+                        backgroundColor: '#ffffff',
+                        padding: 5,
+                        borderRadius: 4,
+                        shadow: true
+                    },
+                    showInLegend: true
+                }
+            },
+            legend: {
+                itemStyle: { color: '#ffffff', fontSize: '11px', fontWeight: 'normal' },
+                itemHoverStyle: { color: '#d633ff' },
+                verticalAlign: 'bottom',
+                layout: 'horizontal',
+                symbolRadius: 6
+            },
+            series: [{
+                name: 'Estado',
+                data: [
+                    { name: 'A Tiempo', y: onTime, color: '#28a745' },
+                    { name: 'Fuera de Plazo', y: late, color: '#dc3545' }
+                ]
+            }],
+            credits: { enabled: false }
+        });
+    }
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    const getKpiVal = () => (Math.random() * (20 - 10) + 10).toFixed(1) + 'K';
+    const yearSelect = document.getElementById('yearFilter');
+    const monthSelect = document.getElementById('monthFilter');
+    
+    const userItems = document.querySelectorAll('.user-item');
+    const displaySpan = document.getElementById('selected-user-name');
+    
+    // Elementos de datos
+    const avgTimeEl = document.getElementById('avg-time');
+    const onTimeEl = document.getElementById('ontime-val');
+    const lateEl = document.getElementById('late-val');
+
+
+// Configuración de fecha actual (Marzo 2026)
+    const now = new Date();
+    const currentYear = now.getFullYear(); 
+    const currentMonth = now.getMonth(); // 0 = Enero, 2 = Marzo
+
+    const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+
+    function renderizarMeses() {
+        const selectedYear = parseInt(yearSelect.value);
+        const mesAnteriorSeleccionado = monthSelect.value;
+        
+        monthSelect.innerHTML = ''; // Limpiar opciones
+
+        // --- NUEVO: Agregar opción "Todos los meses" ---
+        let optionTodos = document.createElement('option');
+        optionTodos.value = 'todos';
+        optionTodos.textContent = 'Todos los meses';
+        // Si no había nada seleccionado antes, podemos poner "Todos" por defecto
+        if (mesAnteriorSeleccionado === 'todos' || !mesAnteriorSeleccionado) {
+            optionTodos.selected = true;
+        }
+        monthSelect.appendChild(optionTodos);
+    // -----------------------------------------------
+
+        // Determinar el límite: si es año actual, solo hasta el mes actual (Marzo)
+        // Si es un año anterior (2025), mostrar los 12 meses.
+        const limite = (selectedYear === currentYear) ? currentMonth : 11;
+
+        for (let i = 0; i <= limite; i++) {
+            let option = document.createElement('option');
+            option.value = i + 1;
+            option.textContent = meses[i];
+            
+            // Lógica de selección por defecto
+            if (selectedYear === currentYear && i === currentMonth) {
+                option.selected = true;
+            } else if (mesAnteriorSeleccionado == (i + 1)) {
+                option.selected = true;
+            }
+
+            monthSelect.appendChild(option);
+        }
+
+        // Ejecutar actualización de gráficos de Highcharts
+        if (typeof updateDashboardData === 'function') {
+            updateDashboardData();
+        }
+    }
+
+    // Inicialización
+    yearSelect.value = currentYear; // Carga automática del año actual
+    renderizarMeses();
+
+    // Eventos
+    yearSelect.addEventListener('change', renderizarMeses);
+    monthSelect.addEventListener('change', function() {
+        if (typeof updateDashboardData === 'function') {
+            updateDashboardData();
+        }
+    });
+
+    // INICIALIZAR EL GRÁFICO DE SLA
+    slaChart = Highcharts.chart('slaLineChart', {
+        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+        title: { text: '' },
+        xAxis: { 
+            categories: ['Ene', 'Feb', 'Mar'], // Se actualizará luego
+            labels: { style: { color: '#9aa4c7' } } 
+        },
+        yAxis: {
+            gridLineColor: '#1a223f',
+            title: { text: 'Horas', style: { color: '#9aa4c7' } },
+            labels: { style: { color: '#9aa4c7' } },
+            plotLines: [
+                { value: 72, color: '#ff4d4d', dashStyle: 'dash', width: 2, zIndex: 5, label: { text: '72h', style: { color: '#ff4d4d' } } },
+                { value: 48, color: '#ffc107', dashStyle: 'dash', width: 2, zIndex: 5, label: { text: '48h', style: { color: '#ffc107' } } }
+            ]
+        },
+        
+        series: [{
+            name: 'Promedio Horas',
+            data: [45, 52, 30], // Datos iniciales
+            color: '#00c4ff',
+            fillColor: {
+                linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                stops: [[0, 'rgba(0,196,255,0.3)'], [1, 'rgba(0,196,255,0)']]
+            }
+        }],
+        credits: { enabled: false }
+    });
+
+    // Escuchar el cambio en el combo propio del SLA
+    document.getElementById('slaFilter').addEventListener('change', updateSlaChart);
+
+
+
+
+
+    // Función para generar números aleatorios entre un rango
+    function getRandom(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min);
+    }
+
+    // Función para formatear números con "K" o separador de miles
+    function formatValue(num) {
+        return (num / 1000).toFixed(1) + 'K'; 
+    }
+
+    function selectUser(element) {
+        // 1. Resaltado visual
+        userItems.forEach(i => i.style.background = "transparent");
+        element.style.background = "rgba(214, 51, 255, 0.1)";
+
+        // 2. Actualizar Nombre
+        const userName = element.querySelector('.user-name').innerText;
+        displaySpan.innerHTML = `<i class="fas fa-user-check me-2"></i> Vista de: ${userName}`;
+
+        // 3. Generar y Actualizar Datos Aleatorios
+        const hours = getRandom(12, 48);
+        const onTime = getRandom(1000, 4000);
+        const late = getRandom(1000, 4000);
+
+        avgTimeEl.innerText = `${hours} horas`;
+        onTimeEl.innerText = formatValue(onTime);
+        lateEl.innerText = formatValue(late);
+
+        // 4. Animación sutil de entrada para los datos
+        const dataElements = [displaySpan, avgTimeEl, onTimeEl, lateEl];
+        dataElements.forEach(el => {
+            el.style.opacity = "0";
+            setTimeout(() => {
+                el.style.transition = "opacity 0.4s ease";
+                el.style.opacity = "1";
+            }, 50);
+        });
+    }
+
+    userItems.forEach(item => {
+        item.addEventListener('click', function() {
+            selectUser(this);
+        });
+    });
+
+    // Seleccionar el primero por defecto
+    if (userItems.length > 0) {
+        selectUser(userItems[0]);
+    }
+
+// --- CONFIGURACIÓN LINE CHART ---
+    lineChart = Highcharts.chart('lineChart', {
+        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+        title: { text: '' },
+        xAxis: { 
+            categories: [], // Se llena dinámicamente
+            labels: { style: { color: '#9aa4c7' } } 
+        },
+        yAxis: { gridLineColor: '#1a223f', title: { text: '' }, labels: { style: { color: '#9aa4c7' } } },
+        credits: { enabled: false },
+        series: [{ name: 'TUPA', data: [], color: '#a855f7' }, 
+                 { name: 'NO TUPA', data: [], color: '#22c55e' }]
+    });
+
+    // --- CONFIGURACIÓN BAR CHART ---
+    barChart = Highcharts.chart('barChart', {
+        chart: { type: 'column', backgroundColor: 'transparent' },
+        title: { text: '' },
+        xAxis: { 
+            categories: [], 
+            labels: { style: { color: '#9aa4c7' } } 
+        },
+        yAxis: { gridLineColor: '#1a223f', title: { text: '' }, labels: { style: { color: '#9aa4c7' } } },
+        plotOptions: { column: { stacking: 'normal', borderRadius: 4 } },
+        credits: { enabled: false },
+        series: [{ name: 'FISICO', data: [], color: '#a855f7' }, 
+                 { name: 'DIGITAL', data: [], color: '#00c4ff' }]
+    });
+
+    // Función extendida para actualizar TODOS los gráficos
+    function actualizarTodo() {
+        const selectedYear = parseInt(yearSelect.value);
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 2 para Marzo
+
+        const mesesFull = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        
+        // 1. ACTUALIZAR TEXTO DE KPIs
+        document.getElementById('kpi-total').innerText = getKpiVal();
+        document.getElementById('kpi-ingresados').innerText = getKpiVal();
+        document.getElementById('kpi-atendidos').innerText = getKpiVal();
+        document.getElementById('kpi-pendientes').innerText = getKpiVal();
+        document.getElementById('kpi-atiempo').innerText = getKpiVal();
+        document.getElementById('kpi-fplazo').innerText = getKpiVal();
+        document.getElementById('kpi-observados').innerText = getKpiVal();
+        document.getElementById('kpi-anulados').innerText = getKpiVal();
+
+        
+        // Determinar cuántos meses mostrar en el eje X
+        const numMeses = (selectedYear === currentYear) ? currentMonth + 1 : 12;
+        const nuevasCategorias = mesesFull.slice(0, numMeses);
+
+        // 1. Actualizar Categorías (Eje X)
+        lineChart.xAxis[0].setCategories(nuevasCategorias);
+        barChart.xAxis[0].setCategories(nuevasCategorias);
+
+        // 2. Simular/Cargar Datos para Line Chart
+        lineChart.series[0].setData(Array.from({length: numMeses}, () => Math.floor(Math.random() * 5000)));
+        lineChart.series[1].setData(Array.from({length: numMeses}, () => Math.floor(Math.random() * 5000)));
+
+        // 3. Simular/Cargar Datos para Bar Chart
+        barChart.series[0].setData(Array.from({length: numMeses}, () => Math.floor(Math.random() * 6000)));
+        barChart.series[1].setData(Array.from({length: numMeses}, () => Math.floor(Math.random() * 6000)));
+        
+        // 4. (Opcional) Aquí llamarías también a updateDashboardData() para el Pie y la Dona
+    }
+
+    yearSelect.addEventListener('change', actualizarTodo);
+    actualizarTodo(); // Carga inicial
+
+// CONFIGURACIÓN ESTADOS (PIE GRANDE)
+    estadosChart = Highcharts.chart('pieChart', {
+        chart: { 
+            type: 'pie', 
+            backgroundColor: 'transparent',
+            margin: [0, 0, 0, 0], // Elimina bordes internos
+            spacing: [0, 0, 0, 0]
+        },
+        title: { text: '' },
+        credits: { enabled: false },
+        tooltip: {
+            backgroundColor: '#07143a',
+            style: { color: '#ffffff' },
+            pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+        },
+        plotOptions: {
+            pie: {
+                size: '100%', // Máximo tamaño
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '<b>{point.percentage:.0f}%</b>',
+                    distance: -30, // Etiquetas adentro
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: 4,
+                    padding: 5,
+                    style: { color: '#000', fontSize: '11px', textOutline: 'none' },
+                    shadow: true
+                }
+            }
+        },
+        legend: {
+            enabled: true,
+            align: 'center',
+            verticalAlign: 'bottom',
+            layout: 'horizontal',
+            itemStyle: { color: '#9aa4c7', fontSize: '10px', fontWeight: 'normal' },
+            symbolRadius: 2,
+            itemMarginTop: 0
+        },
+        series: [{ name: 'Estados', colorByPoint: true, data: [] }]
+    });
+
+    // CONFIGURACIÓN TUPA (DONA GRANDE)
+    tupaChart = Highcharts.chart('donutChart', {
+        chart: { 
+            type: 'pie', 
+            backgroundColor: 'transparent',
+            margin: [0, 0, 0, 0],
+            spacing: [0, 0, 0, 0],
+            events: {
+                render: function() {
+                    var chart = this,
+                        x = chart.plotLeft + chart.plotWidth / 2,
+                        y = chart.plotTop + chart.plotHeight / 2,
+                        total = 0;
+                    chart.series[0].data.forEach(p => total += p.y);
+                    if (chart.customText) chart.customText.destroy();
+                    chart.customText = chart.renderer.text(
+                        `<div style="text-align:center"><span style="font-size:10px;color:#9aa4c7">Total</span><br/>` +
+                        `<span style="font-size:18px;color:#fff;font-weight:bold">${total.toLocaleString()}</span></div>`,
+                        x, y
+                    ).attr({ zIndex: 5 }).css({ textAlign: 'center' }).add();
+                    var box = chart.customText.getBBox();
+                    chart.customText.attr({ x: x - box.width / 2, y: y - box.height / 4 });
+                }
+            }
+        },
+        title: { text: '' },
+        credits: { enabled: false },
+        plotOptions: {
+            pie: {
+                innerSize: '75%', // Look de Dona
+                size: '100%',
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.y}<br/><small>{point.percentage:.0f}%</small>',
+                    distance: -35,
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    borderRadius: 4,
+                    padding: 4,
+                    style: { color: '#000', fontSize: '10px', textOutline: 'none', textAlign: 'center' },
+                    shadow: true
+                }
+            }
+        },
+        legend: {
+            enabled: true,
+            align: 'center',
+            verticalAlign: 'bottom',
+            layout: 'horizontal',
+            itemStyle: { color: '#9aa4c7', fontSize: '10px', fontWeight: 'normal' }
+        },
+        series: [{ name: 'Cantidad', data: [] }]
+    });
+
+    // VÍNCULO CON EL COMBO DE MESES
+    const filter = document.getElementById('monthFilter');
+    if (filter) {
+        filter.addEventListener('change', updateDashboardData);
+    }
+
+    // Carga inicial
+    updateDashboardData();
+
+// MAPA
+
+
+// 1. PRIMERO: Definir los datos (Scope Global)
+const rawData = [
+    { ubigeo: '15', departamentoNombre: 'Lima', total: 500000, count: 120 },
+    { ubigeo: '01', departamentoNombre: 'Amazonas', total: 200000, count: 60 },
+    { ubigeo: '04', departamentoNombre: 'Arequipa', total: 300000, count: 80 },
+    { ubigeo: '08', departamentoNombre: 'Cusco', total: 280000, count: 75 },
+    { ubigeo: '20', departamentoNombre: 'Piura', total: 250000, count: 90 },
+    { ubigeo: '13', departamentoNombre: 'La Libertad', total: 270000, count: 85 },
+    { ubigeo: '16', departamentoNombre: 'Loreto', total: 180000, count: 55 },
+    { ubigeo: '11', departamentoNombre: 'Ica', total: 220000, count: 70 },
+    { ubigeo: '06', departamentoNombre: 'Cajamarca', total: 150000, count: 50 },
+    { ubigeo: '21', departamentoNombre: 'Puno', total: 140000, count: 45 },
+    { ubigeo: '12', departamentoNombre: 'Junín', total: 210000, count: 65 },
+    { ubigeo: '22', departamentoNombre: 'San Martín', total: 130000, count: 40 },
+    { ubigeo: '02', departamentoNombre: 'Áncash', total: 195000, count: 60 }
+];
+
+const ubigeoToHCMap = {
+    '01': 'pe-am', '02': 'pe-an', '03': 'pe-ap', '04': 'pe-ar',
+    '05': 'pe-ay', '06': 'pe-cj', '07': 'pe-3341', '08': 'pe-cs',
+    '09': 'pe-hv', '10': 'pe-hc', '11': 'pe-ic', '12': 'pe-ju',
+    '13': 'pe-ll', '14': 'pe-lb', '15': 'pe-lr', '16': 'pe-lo',
+    '17': 'pe-md', '18': 'pe-mq', '19': 'pe-pa', '20': 'pe-pi',
+    '21': 'pe-cl', '22': 'pe-sm', '23': 'pe-ta', '24': 'pe-tu', '25': 'pe-uc',
+};
+// Función para generar números entre 5000 y 10000
+const getRandMap = () => Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
+
+function updateMapData() {
+    return rawData.map(item => ({
+        'hc-key': ubigeoToHCMap[item.ubigeo],
+        value: getRandMap(), // Cantidad dinámica para el mapa
+        onTime: Math.floor(Math.random() * (7000 - 5000 + 1)) + 5000,
+        late: Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000,
+        name: item.departamentoNombre
+    })).filter(d => d['hc-key']);
+}
+
+fetch('js/peru_highcharts.json')
+    .then(res => res.json())
+    .then(topology => {
+        // Guardamos la instancia en la variable global
+        peruMapChart = Highcharts.mapChart('mapChart', {
+            chart: {
+                map: topology,
+                backgroundColor: 'transparent',
+                events: {
+                    load: function() {
+                        // Selección inicial por defecto
+                        showDeptDetail(this.series[0].data[0]); 
+                    }
+                }
+            },
+            title: { text: '' },
+
+            exporting: {
+                enabled: true,
+                buttons: {
+                    contextButton: {
+                        align: 'left',        // Alineado a la izquierda
+                        verticalAlign: 'top', // En la parte superior
+                        x: 10,
+                        y: 10,
+                        theme: {
+                            fill: '#1a223f',  // Fondo oscuro como tu card
+                            stroke: '#d633ff',
+                            states: {
+                                hover: { fill: '#d633ff' } // Cambio a morado al pasar el mouse
+                            }
+                        }
+                    }
+                }
+            },
+
+            
+            // DESACTIVAR ZOOM CON SCROLL, PERO MANTENER BOTONES
+            mapNavigation: {
+                enabled: true,
+                enableMouseWheelZoom: false, // <-- Esto evita el agrandado accidental
+                buttonOptions: {
+                    verticalAlign: 'bottom',
+                    align: 'left',
+                    theme: { fill: '#1a223f', 'stroke-width': 1, stroke: '#d633ff', style: { color: 'white' } }
+                }
+            },
+
+            colorAxis: {
+                min: 5000,
+                max: 10000,
+                minColor: '#1a223f',
+                maxColor: '#d633ff', // Degradado hacia el morado neón
+                stops: [
+                    [0, '#1a223f'],
+                    [0.5, '#5e5ce6'],
+                    [1, '#d633ff']
+                ]
+            },
+
+            series: [{
+                data: updateMapData(),
+                name: 'Registros',
+                borderColor: '#2d375a',
+                borderWidth: 0.5,
+                states: {
+                    hover: { color: '#f3ba2f' },
+                    select: { color: '#f3ba2f', borderColor: 'white' }
+                },
+                allowPointSelect: true,
+                cursor: 'pointer',
+                events: {
+                    click: function(e) {
+                        showDeptDetail(e.point);
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}',
+                    style: { fontSize: '9px', color: '#fff', textOutline: 'none' }
+                }
+            }],
+            tooltip: {
+                backgroundColor: '#1a223f',
+                style: { color: '#fff' },
+                pointFormat: '{point.name}: <b>{point.value} registros</b>'
+            },
+            legend: { enabled: false }
+        });
+
+        // EVENTO DEL COMBO (TODOS, TUPA, NO TUPA)
+        document.getElementById('mapFilter').addEventListener('change', function() {
+            peruMapChart.series[0].setData(updateMapData());
+        });
+    });
+
+// 2. Función para disparar el efecto visual y actualización
+function refreshMapByYear() {
+    if (!peruMapChart) return;
+
+    // Efecto visual de "parpadeo" o carga en el contenedor del mapa
+    const container = document.getElementById('mapChart');
+    container.style.opacity = '0.5';
+    container.style.transition = 'opacity 0.2s';
+
+    setTimeout(() => {
+        // Genera nuevos datos aleatorios (usando tu función getRandMap existente)
+        const newData = updateMapData();
+        
+        // Actualiza el mapa con animación
+        peruMapChart.series[0].setData(newData, true, { duration: 800 });
+
+        // Actualiza el detalle lateral con el primer punto para que los números también cambien
+        showDeptDetail(peruMapChart.series[0].data[0]);
+
+        container.style.opacity = '1';
+    }, 200);
+}
+// 3. Vincular al evento de cambio de año (Añadir esto a tu DOMContentLoaded)
+document.getElementById('yearFilter').addEventListener('change', function() {
+    refreshMapByYear();
+});
+
+// ACTUALIZACIÓN DE LA FUNCIÓN showDeptDetail
+function showDeptDetail(point) {
+    // 1. Datos base del departamento
+    const total = point.value || 0;
+    const onTime = point.onTime || 0;
+    const late = point.late || 0;
+    const pct = total > 0 ? ((onTime / total) * 100).toFixed(1) : 0;
+    const name = point.name || "Perú";
+
+    // 2. Actualizar Título dinámico (el que va sobre los gráficos de abajo)
+    const dynamicTitle = document.getElementById('selected-dept-name');
+    if (dynamicTitle) dynamicTitle.innerText = name;
+
+    // 3. Actualizar Tabla Lateral (Tu código original mejorado)
+    document.getElementById('dept-title').innerText = name;
+    document.getElementById('dept-stats-body').innerHTML = `
+        <tr>
+            <td><small class="">Total Registros</small><br><strong style="font-size: 1.2rem;">${total.toLocaleString()}</strong></td>
+            <td></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div class="progress" style="height: 5px; background: #2d375a;">
+                    <div class="progress-bar bg-success" style="width: ${pct}%"></div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td><small class="">A Tiempo</small><br><span class="text-success">${onTime.toLocaleString()}</span></td>
+            <td><small class="">Fuera Plazo</small><br><span class="text-danger">${late.toLocaleString()}</span></td>
+        </tr>
+    `;
+
+    // 4. Actualizar el Pie pequeño del detalle
+    renderDeptPie(onTime, late);
+
+    // 5. NUEVO: Actualizar KPIs Superiores (Rango 10k - 20k)
+    const formatK = (val) => (val / 1000).toFixed(1) + 'K';
+    const randK = () => Math.floor(Math.random() * (20000 - 10000 + 1)) + 10000;
+
+    const kpiIds = ['kpi-total', 'kpi-ingresados', 'kpi-atendidos', 'kpi-pendientes', 'kpi-atiempo', 'kpi-fplazo', 'kpi-observados', 'kpi-anulados'];
+    kpiIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerText = formatK(randK());
+    });
+    // Al hacer clic en el mapa, refrescamos el gráfico de SLA
+    updateSlaChart();
+
+    // 6. NUEVO: Sincronizar todos los gráficos grandes
+    actualizarGraficosRelacionados();
+    
+}
+
+// Función auxiliar para generar datos aleatorios en los gráficos al hacer clic
+function actualizarGraficosRelacionados() {
+    const rand = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
+    const numMeses = lineChart.xAxis[0].categories.length; // Respeta el filtro de año actual
+
+    // a) Actualizar Pie de Estados
+    estadosChart.series[0].setData([
+        { name: 'Archiva.', y: rand(1000, 5000), color: '#7E129B' },
+        { name: 'Calidad', y: rand(1000, 5000), color: '#A134D0' },
+        { name: 'Derivado', y: rand(1000, 5000), color: '#C26DF2' },
+        { name: 'Observado', y: rand(500, 2000), color: '#D69DF9' }
+    ]);
+
+    // b) Actualizar Dona de TUPA
+    tupaChart.series[0].setData([
+        { name: 'TUPA', y: rand(5000, 10000), color: '#00c4ff' },
+        { name: 'NO TUPA', y: rand(2000, 5000), color: '#5e5ce6' }
+    ]);
+
+    // c) Actualizar Line Chart
+    lineChart.series[0].setData(Array.from({length: numMeses}, () => rand(1000, 5000)));
+    lineChart.series[1].setData(Array.from({length: numMeses}, () => rand(1000, 5000)));
+
+    // d) Actualizar Bar Chart
+    barChart.series[0].setData(Array.from({length: numMeses}, () => rand(2000, 6000)));
+    barChart.series[1].setData(Array.from({length: numMeses}, () => rand(2000, 6000)));
+}
+
+
+});
+</script>
+
+</body>
+</html>
