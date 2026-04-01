@@ -17,559 +17,600 @@
 
 <style>
     /* Estilos para el botón flotante sobre el mapa */
-.map-overlay-btn {
-    position: absolute; /* Esto lo hace flotar */
-    top: 70px;         /* Distancia desde la parte superior del contenedor */
-    right: 20px;       /* Distancia desde la derecha */
-    z-index: 100;      /* Se asegura de que esté por encima del mapa */
-    background-color: rgba(26, 34, 63, 0.9); /* Fondo oscuro semitransparente */
-    color: #d633ff;     /* Color del texto (morado neón) */
-    border: 1px solid #d633ff; /* Borde morado */
-    padding: 6px 12px;
-    border-radius: 5px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    width: auto;       /* Evita que ocupe todo el ancho */
-    display: flex;     /* Para alinear icono y texto */
-    align-items: center;
-    gap: 5px;
-}
+    .map-overlay-btn {
+        position: absolute; /* Esto lo hace flotar */
+        top: 70px;         /* Distancia desde la parte superior del contenedor */
+        right: 20px;       /* Distancia desde la derecha */
+        z-index: 100;      /* Se asegura de que esté por encima del mapa */
+        background-color: rgba(26, 34, 63, 0.9); /* Fondo oscuro semitransparente */
+        color: #d633ff;     /* Color del texto (morado neón) */
+        border: 1px solid #d633ff; /* Borde morado */
+        padding: 6px 12px;
+        border-radius: 5px;
+        font-size: 13px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: auto;       /* Evita que ocupe todo el ancho */
+        display: flex;     /* Para alinear icono y texto */
+        align-items: center;
+        gap: 5px;
+    }
 
-.map-overlay-btn:hover {
-    background-color: #d633ff; /* Al pasar el mouse, fondo morado completo */
-    color: #ffffff;
-    box-shadow: 0 0 10px rgba(214, 51, 255, 0.6);
-}
+    .map-overlay-btn:hover {
+        background-color: #d633ff; /* Al pasar el mouse, fondo morado completo */
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(214, 51, 255, 0.6);
+    }
 
-.map-overlay-btn i {
-    font-size: 14px;
-}
-/* Forzamos que la tabla y sus componentes no tengan fondo */
-.table-ana-dark, 
-.table-ana-dark tbody, 
-.table-ana-dark tr, 
-.table-ana-dark td, 
-.table-ana-dark th {
-    background-color: transparent !important; /* Elimina cualquier color de fondo */
-    background: none !important;
-}
+    .map-overlay-btn i {
+        font-size: 14px;
+    }
+    /* Forzamos que la tabla y sus componentes no tengan fondo */
+    .table-ana-dark, 
+    .table-ana-dark tbody, 
+    .table-ana-dark tr, 
+    .table-ana-dark td, 
+    .table-ana-dark th {
+        background-color: transparent !important; /* Elimina cualquier color de fondo */
+        background: none !important;
+    }
 
-/* Opcional: Si quieres que al pasar el mouse (hover) se ilumine un poquito 
-   como en la lista de usuarios, puedes usar una opacidad muy baja */
-.table-ana-dark tbody tr:hover {
-    background-color: rgba(255, 255, 255, 0.03) !important; 
-}
+    /* Opcional: Si quieres que al pasar el mouse (hover) se ilumine un poquito 
+    como en la lista de usuarios, puedes usar una opacidad muy baja */
+    .table-ana-dark tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important; 
+    }
 
-#mapFilter {
-    background-color: #1a223f !important;
-    border: 1px solid #2d375a !important;
-    color: #d633ff !important;
-    font-weight: bold;
-}
+    #mapFilter {
+        background-color: #1a223f !important;
+        border: 1px solid #2d375a !important;
+        color: #d633ff !important;
+        font-weight: bold;
+    }
 
-#dept-detail-card {
-    border-left: 4px solid #d633ff;
-    animation: fadeInRight 0.5s ease;
-}
+    #dept-detail-card {
+        border-left: 4px solid #d633ff;
+        animation: fadeInRight 0.5s ease;
+    }
 
-@keyframes fadeInRight {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
-}
+    @keyframes fadeInRight {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
 
-/* Estilo de los botones del mapa */
-.highcharts-map-navigation {
-    padding: 10px;
-}
-/* Centrar y limitar el ancho del contenido */
-.content { 
-    margin-left: 260px; 
-    padding: 20px; 
-    display: flex;
-    justify-content: center; /* Centra el contenedor interno */
-}
+    /* Estilo de los botones del mapa */
+    .highcharts-map-navigation {
+        padding: 10px;
+    }
+    /* Centrar y limitar el ancho del contenido */
+    .content { 
+        margin-left: 260px; 
+        padding: 20px; 
+        display: flex;
+        justify-content: center; /* Centra el contenedor interno */
+    }
 
-.main-container {
-    width: 100%;
-    max-width: 1400px; /* AQUÍ ajustas qué tan "angosto" lo quieres */
-    margin: 0 auto;    /* Asegura el centrado */
-}
+    .main-container {
+        width: 100%;
+        max-width: 1400px; /* AQUÍ ajustas qué tan "angosto" lo quieres */
+        margin: 0 auto;    /* Asegura el centrado */
+    }
 
-/* Ajuste para que el mapa no se desborde si el contenedor es pequeño */
-.map { 
-    height: 500px; 
-    width: 100%; 
-}
+    /* Ajuste para que el mapa no se desborde si el contenedor es pequeño */
+    .map { 
+        height: 500px; 
+        width: 100%; 
+    }
 
-/* Tipografía y Títulos */
-.section-title {
-    color: #ffffff;
-    font-weight: 500;
-    font-size: 1.8rem;
-    margin-bottom: 5px;
-}
+    /* Tipografía y Títulos */
+    .section-title {
+        color: #ffffff;
+        font-weight: 500;
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
 
-.section-subtitle {
-    color: #9aa4c7;
-    font-size: 0.95rem;
-    margin: 0;
-}
+    .section-subtitle {
+        color: #9aa4c7;
+        font-size: 0.95rem;
+        margin: 0;
+    }
 
-/* Botón Exportar (Estilo transparente/outline) */
-.btn-export {
-    background: rgba(26, 34, 63, 0.4);
-    border: 1px solid #2d375a;
-    color: #ffffff;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-}
+    /* Botón Exportar (Estilo transparente/outline) */
+    .btn-export {
+        background: rgba(26, 34, 63, 0.4);
+        border: 1px solid #2d375a;
+        color: #ffffff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
 
-.btn-export:hover {
-    background: #2d375a;
-    border-color: #4f46e5;
-}
+    .btn-export:hover {
+        background: #2d375a;
+        border-color: #4f46e5;
+    }
 
-/* Botón Crear Reporte (Estilo degradado morado) */
-.btn-create {
-    background: linear-gradient(90deg, #c026d3 0%, #a21caf 100%);
-    border: none;
-    color: #ffffff;
-    padding: 10px 25px;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    box-shadow: 0 4px 15px rgba(192, 38, 211, 0.3);
-}
+    /* Botón Crear Reporte (Estilo degradado morado) */
+    .btn-create {
+        background: linear-gradient(90deg, #c026d3 0%, #a21caf 100%);
+        border: none;
+        color: #ffffff;
+        padding: 10px 25px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        box-shadow: 0 4px 15px rgba(192, 38, 211, 0.3);
+    }
 
-.btn-create:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(192, 38, 211, 0.4);
-    background: linear-gradient(90deg, #d946ef 0%, #c026d3 100%);
-}
+    .btn-create:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(192, 38, 211, 0.4);
+        background: linear-gradient(90deg, #d946ef 0%, #c026d3 100%);
+    }
 
-.btn-create:active {
-    transform: translateY(0);
-}
+    .btn-create:active {
+        transform: translateY(0);
+    }
 
-/* TUS ESTILOS ORIGINALES */
-body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
-.sidebar { width: 260px; height: 100vh; position: fixed; background: linear-gradient(180deg,#050f3a,#020c2b); padding: 20px; }
-.sidebar a { display: block; padding: 10px; color: #9aa4c7; border-radius: 8px; margin-bottom: 5px; text-decoration: none; }
-.sidebar a.active { background: linear-gradient(90deg,#9333ea,#a855f7); color: white; }
-.content { margin-left: 260px; padding: 20px; }
-.card-dark { background: #07143a; border-radius: 14px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
-.kpi { border-radius: 12px; padding: 16px; color: white; font-weight: 500; }
-.kpi small { opacity: 0.7; }
-.kpi-total { background: linear-gradient(135deg,#4f46e5,#9333ea); }
-.kpi-ok { background: linear-gradient(135deg,#16a34a,#22c55e); }
-.kpi-ok-ok { background: linear-gradient(135deg,#093b1c,#0a692d); }
-.kpi-bad { background: linear-gradient(135deg,#dc2626,#ef4444); }
-.kpi-bad-bad { background: linear-gradient(135deg,#5e1d1d,#ef4444); }
-.kpi-warn { background: linear-gradient(135deg,#d97706,#f59e0b); }
-.kpi-blue { background: linear-gradient(135deg,#1d0491,#2d30f5); }
-.kpi-neutral { background: linear-gradient(135deg,#374151,#6b7280); }
-.chart { height: 280px; }
-.map { height: 600px; } /* Ajustado para que se vea completo */
-.user-list li { display: flex; justify-content: space-between; padding: 6px 0; }
+    /* TUS ESTILOS ORIGINALES */
+    body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
+    .sidebar { width: 260px; height: 100vh; position: fixed; background: linear-gradient(180deg,#050f3a,#020c2b); padding: 20px; }
+    .sidebar a { display: block; padding: 10px; color: #9aa4c7; border-radius: 8px; margin-bottom: 5px; text-decoration: none; }
+    .sidebar a.active { background: linear-gradient(90deg,#9333ea,#a855f7); color: white; }
+    .content { margin-left: 260px; padding: 20px; }
+    .card-dark { background: #07143a; border-radius: 14px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+    .kpi { border-radius: 12px; padding: 16px; color: white; font-weight: 500; }
+    .kpi small { opacity: 0.7; }
+    .kpi-total { background: linear-gradient(135deg,#4f46e5,#9333ea); }
+    .kpi-ok { background: linear-gradient(135deg,#16a34a,#22c55e); }
+    .kpi-ok-ok { background: linear-gradient(135deg,#093b1c,#0a692d); }
+    .kpi-bad { background: linear-gradient(135deg,#dc2626,#ef4444); }
+    .kpi-bad-bad { background: linear-gradient(135deg,#5e1d1d,#ef4444); }
+    .kpi-warn { background: linear-gradient(135deg,#d97706,#f59e0b); }
+    .kpi-blue { background: linear-gradient(135deg,#1d0491,#2d30f5); }
+    .kpi-neutral { background: linear-gradient(135deg,#374151,#6b7280); }
+    .chart { height: 280px; }
+    .map { height: 600px; } /* Ajustado para que se vea completo */
+    .user-list li { display: flex; justify-content: space-between; padding: 6px 0; }
+    /* Nuevo KPI: En Trámite (Naranja) */
+    .kpi-orange {
+        background: linear-gradient(135deg, #f97316, #fb923c); /* Degradado Naranja vibrante */
+    }
+    .kpi-cyan {
+        background: linear-gradient(135deg, #00f2fe, #4facfe);
+        color: #fff;
+    }
+    .kpi-magenta {
+        background: linear-gradient(135deg, #ff0080, #d633ff);
+        color: #fff;
+    }
+
+    .kpi2 { 
+        border-radius: 12px; 
+        padding: 30px 20px;
+        color: white; 
+        font-weight: 500; 
+        justify-content: center;
+        min-height: 160px;
+    }
+
+    .kpi2 small {
+        font-size: 0.85rem;
+        color: #9aa4c7;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 10px;
+    }
+
+    .kpi2 h4 {
+        font-size: 2.2rem; /* Número más grande para llenar el espacio */
+        font-weight: 700;
+        margin: 0;
+        color: #ffffff;
+    }
+
+    .sidebar {
+        width: 260px;
+        height: 100vh;
+        background: #070d19; /* Azul muy oscuro de la imagen */
+        color: #ffffff;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 0;
+        border-right: 1px solid #1a223f;
+        position: fixed;
+    }
+
+    .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        margin-bottom: 30px;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+
+    /* Buscador */
+    .sidebar-search {
+        padding: 0 20px;
+        margin-bottom: 25px;
+    }
+    .search-box {
+        background: rgba(26, 34, 63, 0.5);
+        border: 1px solid #1a223f;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        padding: 8px 15px;
+    }
+    .search-box input {
+        background: transparent;
+        border: none;
+        color: #9aa4c7;
+        margin-left: 10px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+
+    /* Items del Menú */
+    .menu-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 20px;
+        cursor: pointer;
+        color: #9aa4c7;
+        transition: 0.3s;
+    }
+    .menu-item:hover, .menu-item.active {
+        color: #ffffff;
+    }
+    .menu-icon { margin-right: 15px; }
+    .active-icon { color: #d633ff; } /* Morado brillante */
+
+    /* Submenú */
+    .submenu {
+        display: flex;
+        flex-direction: column;
+        padding-left: 50px; /* Alineación con el texto superior */
+    }
+    .submenu-item {
+        padding: 10px 0;
+        color: #9aa4c7;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: 0.3s;
+    }
+    .submenu-item:hover { color: #ffffff; }
+    .submenu-item.active {
+        color: #ffffff;
+        position: relative;
+        /* Efecto de borde izquierdo brillante de la imagen */
+        border-left: 3px solid #d633ff; 
+        padding-left: 15px;
+        margin-left: -18px;
+        background: linear-gradient(90deg, rgba(214, 51, 255, 0.1) 0%, transparent 100%);
+    }
+
+    /* Footer de Usuario */
+    .sidebar-footer {
+        margin-top: auto;
+        padding: 20px;
+        border-top: 1px solid #1a223f;
+    }
+    .user-profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid #5e5ce6;
+    }
+    .user-info2 { display: flex; flex-direction: column; }
+    .user-name2 { font-size: 0.9rem; font-weight: bold; }
+    .user-role { font-size: 0.75rem; color: #9aa4c7; }
+    .arrow-small { margin-left: auto; color: #9aa4c7; font-size: 0.8rem; }
 
 
-.kpi2 { 
-    border-radius: 12px; 
-    padding: 30px 20px;
-    color: white; 
-    font-weight: 500; 
-    justify-content: center;
-    min-height: 160px;
-}
+    /* NUEVOS ESTILOS PARA LAS BARRAS DE SEDES */
+    .progress-bar-custom { background: #1a223f; height: 8px; border-radius: 10px; margin-bottom: 15px; }
+    .progress-fill { height: 100%; border-radius: 10px; }
 
-.kpi2 small {
-    font-size: 0.85rem;
-    color: #9aa4c7;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-}
+    /* Estilos para la lista de usuarios tipo Avatar */
 
-.kpi2 h4 {
-    font-size: 2.2rem; /* Número más grande para llenar el espacio */
-    font-weight: 700;
-    margin: 0;
-    color: #ffffff;
-}
+    /* Indica que la lista es interactiva */
+    .user-item {
+        cursor: pointer;
+        transition: background 0.2s ease;
+        padding: 8px;
+        border-radius: 8px;
+    }
 
-.sidebar {
-    width: 260px;
-    height: 100vh;
-    background: #070d19; /* Azul muy oscuro de la imagen */
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0;
-    border-right: 1px solid #1a223f;
-    position: fixed;
-}
+    .user-item:hover {
+        background: rgba(214, 51, 255, 0.1); /* Sutil fondo morado */
+    }
 
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    margin-bottom: 30px;
-}
+    /* Clase para resaltar el usuario seleccionado en la lista */
+    .user-item.active-selection {
+        background: rgba(214, 51, 255, 0.2);
+        border-left: 3px solid #d633ff;
+    }
 
-.logo {
-    display: flex;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-}
+    .user-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-/* Buscador */
-.sidebar-search {
-    padding: 0 20px;
-    margin-bottom: 25px;
-}
-.search-box {
-    background: rgba(26, 34, 63, 0.5);
-    border: 1px solid #1a223f;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    padding: 8px 15px;
-}
-.search-box input {
-    background: transparent;
-    border: none;
-    color: #9aa4c7;
-    margin-left: 10px;
-    outline: none;
-    font-size: 0.9rem;
-}
+    .user-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-/* Items del Menú */
-.menu-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 20px;
-    cursor: pointer;
-    color: #9aa4c7;
-    transition: 0.3s;
-}
-.menu-item:hover, .menu-item.active {
-    color: #ffffff;
-}
-.menu-icon { margin-right: 15px; }
-.active-icon { color: #d633ff; } /* Morado brillante */
+    .user-item:last-child {
+        border-bottom: none;
+    }
 
-/* Submenú */
-.submenu {
-    display: flex;
-    flex-direction: column;
-    padding-left: 50px; /* Alineación con el texto superior */
-}
-.submenu-item {
-    padding: 10px 0;
-    color: #9aa4c7;
-    text-decoration: none;
-    font-size: 0.9rem;
-    transition: 0.3s;
-}
-.submenu-item:hover { color: #ffffff; }
-.submenu-item.active {
-    color: #ffffff;
-    position: relative;
-    /* Efecto de borde izquierdo brillante de la imagen */
-    border-left: 3px solid #d633ff; 
-    padding-left: 15px;
-    margin-left: -18px;
-    background: linear-gradient(90deg, rgba(214, 51, 255, 0.1) 0%, transparent 100%);
-}
+    .user-info2 {
+        display: flex;
+        align-items: center;
+    }
 
-/* Footer de Usuario */
-.sidebar-footer {
-    margin-top: auto;
-    padding: 20px;
-    border-top: 1px solid #1a223f;
-}
-.user-profile {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid #5e5ce6;
-}
-.user-info2 { display: flex; flex-direction: column; }
-.user-name2 { font-size: 0.9rem; font-weight: bold; }
-.user-role { font-size: 0.75rem; color: #9aa4c7; }
-.arrow-small { margin-left: auto; color: #9aa4c7; font-size: 0.8rem; }
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 15px;
+        border: 2px solid #a855f7; /* Círculo morado de la imagen */
+        object-fit: cover;
+    }
 
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
 
-/* NUEVOS ESTILOS PARA LAS BARRAS DE SEDES */
-.progress-bar-custom { background: #1a223f; height: 8px; border-radius: 10px; margin-bottom: 15px; }
-.progress-fill { height: 100%; border-radius: 10px; }
+    .user-name {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+    }
 
-/* Estilos para la lista de usuarios tipo Avatar */
+    .user-email {
+        font-size: 0.8rem;
+        color: #9aa4c7; /* Color gris de la referencia */
+    }
 
-/* Indica que la lista es interactiva */
-.user-item {
-    cursor: pointer;
-    transition: background 0.2s ease;
-    padding: 8px;
-    border-radius: 8px;
-}
+    .user-value {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #ffffff;
+    }
+    /* Estilos para el listado de Sedes */
+    .sede-list {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
 
-.user-item:hover {
-    background: rgba(214, 51, 255, 0.1); /* Sutil fondo morado */
-}
+    .sede-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
 
-/* Clase para resaltar el usuario seleccionado en la lista */
-.user-item.active-selection {
-    background: rgba(214, 51, 255, 0.2);
-    border-left: 3px solid #d633ff;
-}
+    .sede-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.user-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+    .sede-name {
+        font-size: 0.9rem;
+        color: #9aa4c7;
+        font-weight: 500;
+    }
 
-.user-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
+    .sede-percentage {
+        font-size: 0.9rem;
+        color: #ffffff;
+        font-weight: 600;
+    }
 
-.user-item:last-child {
-    border-bottom: none;
-}
+    /* Contenedor de la barra */
+    .progress-custom {
+        background: #1a223f;
+        height: 6px;
+        border-radius: 10px;
+        overflow: hidden;
+        width: 100%;
+    }
 
-.user-info2 {
-    display: flex;
-    align-items: center;
-}
+    /* Relleno con los mismos degradados que tus KPIs */
+    .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease-in-out;
+    }
 
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    margin-right: 15px;
-    border: 2px solid #a855f7; /* Círculo morado de la imagen */
-    object-fit: cover;
-}
+    /* Badge de tendencia verde */
+    .badge-trend {
+        font-size: 0.45em;
+        background: rgba(34, 197, 94, 0.15);
+        color: #22c55e;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-left: 12px;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .sede-stats {
+        display: flex;
+        gap: 12px;
+        align-items: baseline;
+    }
 
-.user-details {
-    display: flex;
-    flex-direction: column;
-}
+    .sede-count {
+        font-size: 0.95rem;
+        color: #ffffff; /* Cantidad en blanco para resaltar */
+        font-weight: 700;
+    }
 
-.user-name {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: #ffffff;
-}
+    .sede-percentage {
+        font-size: 0.8rem;
+        color: #9aa4c7; /* Porcentaje en gris como dato secundario */
+        font-weight: 400;
+    }
+    /* Scrollbar elegante para la lista de departamentos */
+    .sede-list::-webkit-scrollbar {
+        width: 4px;
+    }
+    .sede-list::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .sede-list::-webkit-scrollbar-thumb {
+        background: #1a223f;
+        border-radius: 10px;
+    }
+    .sede-list::-webkit-scrollbar-thumb:hover {
+        background: #4f46e5;
+    }
+    /* Contenedor principal de filtros */
+    .filters-container {
+        padding: 10px 0;
+    }
 
-.user-email {
-    font-size: 0.8rem;
-    color: #9aa4c7; /* Color gris de la referencia */
-}
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
 
-.user-value {
-    font-size: 1.1rem;
-    font-weight: 500;
-    color: #ffffff;
-}
-/* Estilos para el listado de Sedes */
-.sede-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
+    .filter-label {
+        font-size: 0.75rem;
+        color: #9aa4c7;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
 
-.sede-item {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+    /* Wrapper para el icono personalizado */
+    .select-wrapper {
+        position: relative;
+        min-width: 200px;
+    }
 
-.sede-info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .custom-select {
+        width: 100%;
+        background: #1a223f; /* Mismo color que los inputs de la sidebar */
+        border: 1px solid #2d375a;
+        color: #ffffff;
+        padding: 10px 35px 10px 15px;
+        border-radius: 8px;
+        appearance: none; /* Quita la flecha nativa */
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
 
-.sede-name {
-    font-size: 0.9rem;
-    color: #9aa4c7;
-    font-weight: 500;
-}
+    .custom-select:focus {
+        outline: none;
+        border-color: #5e5ce6;
+        box-shadow: 0 0 0 2px rgba(94, 92, 230, 0.2);
+    }
 
-.sede-percentage {
-    font-size: 0.9rem;
-    color: #ffffff;
-    font-weight: 600;
-}
+    .select-icon {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9aa4c7;
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
 
-/* Contenedor de la barra */
-.progress-custom {
-    background: #1a223f;
-    height: 6px;
-    border-radius: 10px;
-    overflow: hidden;
-    width: 100%;
-}
+    /* Botón de reset */
+    .btn-filter-reset {
+        background: #1a223f;
+        border: 1px solid #2d375a;
+        color: #9aa4c7;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-top: 20px; /* Alineado con el select, no con el label */
+        cursor: pointer;
+        transition: 0.3s;
+    }
 
-/* Relleno con los mismos degradados que tus KPIs */
-.progress-fill {
-    height: 100%;
-    border-radius: 10px;
-    transition: width 0.5s ease-in-out;
-}
+    .btn-filter-reset:hover {
+        background: #2d375a;
+        color: #ffffff;
+    }
+    /* El resto del CSS anterior se mantiene igual */
+    /* Estilo para el área de scroll de usuarios */
+    .user-scroll-area::-webkit-scrollbar {
+        width: 4px;
+    }
 
-/* Badge de tendencia verde */
-.badge-trend {
-    font-size: 0.45em;
-    background: rgba(34, 197, 94, 0.15);
-    color: #22c55e;
-    padding: 4px 10px;
-    border-radius: 6px;
-    margin-left: 12px;
-    border: 1px solid rgba(34, 197, 94, 0.2);
-}
-.sede-stats {
-    display: flex;
-    gap: 12px;
-    align-items: baseline;
-}
+    .user-scroll-area::-webkit-scrollbar-track {
+        background: transparent;
+    }
 
-.sede-count {
-    font-size: 0.95rem;
-    color: #ffffff; /* Cantidad en blanco para resaltar */
-    font-weight: 700;
-}
+    .user-scroll-area::-webkit-scrollbar-thumb {
+        background: #1a223f; /* Color sobrio que combina con el fondo */
+        border-radius: 10px;
+    }
 
-.sede-percentage {
-    font-size: 0.8rem;
-    color: #9aa4c7; /* Porcentaje en gris como dato secundario */
-    font-weight: 400;
-}
-/* Scrollbar elegante para la lista de departamentos */
-.sede-list::-webkit-scrollbar {
-    width: 4px;
-}
-.sede-list::-webkit-scrollbar-track {
-    background: transparent;
-}
-.sede-list::-webkit-scrollbar-thumb {
-    background: #1a223f;
-    border-radius: 10px;
-}
-.sede-list::-webkit-scrollbar-thumb:hover {
-    background: #4f46e5;
-}
-/* Contenedor principal de filtros */
-.filters-container {
-    padding: 10px 0;
-}
+    .user-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #5e5ce6; /* Resalte sutil al pasar el mouse */
+    }
+    /* Estilos para KPIs Interactivos */
+    .kpi-interactive {
+        cursor: pointer;
+        transition: all 0.3s ease; /* Animación suave para hover */
+        position: relative; /* Necesario para posicionar el icono */
+        overflow: hidden; /* Mantiene el icono dentro del recuadro */
+    }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
+    /* Efecto al pasar el mouse (Hover) */
+    .kpi-interactive:hover {
+        transform: translateY(-4px); /* Se eleva ligeramente */
+        box-shadow: 0 8px 15px rgba(214, 51, 255, 0.2); /* Sombra morada suave */
+        border-color: rgba(214, 51, 255, 0.6) !important; /* Brillo en el borde */
+    }
 
-.filter-label {
-    font-size: 0.75rem;
-    color: #9aa4c7;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 600;
-}
+    /* Icono Indicador de Desglose */
+    .kpi-details-icon {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        font-size: 0.8rem;
+        color: rgba(154, 164, 199, 0.6); /* Gris suave por defecto */
+        transition: all 0.3s ease;
+    }
 
-/* Wrapper para el icono personalizado */
-.select-wrapper {
-    position: relative;
-    min-width: 200px;
-}
-
-.custom-select {
-    width: 100%;
-    background: #1a223f; /* Mismo color que los inputs de la sidebar */
-    border: 1px solid #2d375a;
-    color: #ffffff;
-    padding: 10px 35px 10px 15px;
-    border-radius: 8px;
-    appearance: none; /* Quita la flecha nativa */
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-.custom-select:focus {
-    outline: none;
-    border-color: #5e5ce6;
-    box-shadow: 0 0 0 2px rgba(94, 92, 230, 0.2);
-}
-
-.select-icon {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #9aa4c7;
-    pointer-events: none;
-    font-size: 0.8rem;
-}
-
-/* Botón de reset */
-.btn-filter-reset {
-    background: #1a223f;
-    border: 1px solid #2d375a;
-    color: #9aa4c7;
-    padding: 10px 15px;
-    border-radius: 8px;
-    margin-top: 20px; /* Alineado con el select, no con el label */
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-filter-reset:hover {
-    background: #2d375a;
-    color: #ffffff;
-}
-/* El resto del CSS anterior se mantiene igual */
-/* Estilo para el área de scroll de usuarios */
-.user-scroll-area::-webkit-scrollbar {
-    width: 4px;
-}
-
-.user-scroll-area::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.user-scroll-area::-webkit-scrollbar-thumb {
-    background: #1a223f; /* Color sobrio que combina con el fondo */
-    border-radius: 10px;
-}
-
-.user-scroll-area::-webkit-scrollbar-thumb:hover {
-    background: #5e5ce6; /* Resalte sutil al pasar el mouse */
-}
+    /* Cambio de color del icono en Hover */
+    .kpi-interactive:hover .kpi-details-icon {
+        color: #d633ff; /* Morado neón en hover */
+        transform: scale(1.1); /* Crece un poco */
+    }
 </style>
 
 </head>
@@ -656,16 +697,68 @@ body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
         </div>
         </div>
        <div class="row g-3 my-3">
-            <div class="col-md-3"><div class="kpi kpi-total"><small>Total</small><h4 id="kpi-total">50.8K</h4></div></div>
-            <div class="col-md-3"><div class="kpi kpi-blue"><small>Ingresados</small><h4 id="kpi-ingresados">0.6K</h4></div></div>
-            <div class="col-md-3"><div class="kpi kpi-ok"><small>Atendidos</small><h4 id="kpi-atendidos">41.3K</h4></div></div>
-            <div class="col-md-3"><div class="kpi kpi-bad"><small>Pendientes</small><h4 id="kpi-pendientes">8.5K</h4></div></div>
+            <div class="col" style="flex: 0 0 20%;">
+                <div class="kpi kpi-total kpi-interactive" onclick="resetSecondaryRows()">
+                    <small>Total</small>
+                    <h4 id="kpi-total">50.8K</h4>
+                </div>
+            </div>
+            <div class="col" style="flex: 0 0 20%;">
+                <div class="kpi kpi-blue">
+                    <small>Ingresados</small>
+                    <h4 id="kpi-ingresados">0.6K</h4>
+                </div>
+            </div>
+            <div class="col" style="flex: 0 0 20%;">
+                <div class="kpi kpi-ok kpi-interactive" onclick="showRow('row-atendidos')">
+                    <i class="fas fa-eye kpi-details-icon" title="Ver detalle"></i>
+                    <small>Atendidos</small>
+                    <h4 id="kpi-atendidos">41.3K</h4>
+                </div>
+            </div>
+            <div class="col" style="flex: 0 0 20%;">
+                <div class="kpi kpi-bad kpi-interactive" onclick="showRow('row-pendientes')">
+                    <i class="fas fa-eye kpi-details-icon" title="Ver detalle"></i>
+                    <small>Pendientes</small>
+                    <h4 id="kpi-pendientes">8.5K</h4>
+                </div>
+            </div>
+            <div class="col" style="flex: 0 0 20%;">
+                <div class="kpi kpi-neutral">
+                    <small>Anulados</small>
+                    <h4 id="kpi-anulados">0.4K</h4>
+                </div>
+            </div>
         </div>
-        <div class="row g-3 my-3">
-            <div class="col-md-3"><div class="kpi kpi-ok-ok"><small>Atendido a Tiempo</small><h4 id="kpi-atiempo">50.8K</h4></div></div>
-            <div class="col-md-3"><div class="kpi kpi-bad-bad"><small>Fuera del Plazo</small><h4 id="kpi-fplazo">41.3K</h4></div></div>  
-            <div class="col-md-3"><div class="kpi kpi-warn"><small>Observados</small><h4 id="kpi-observados">0.6K</h4></div></div>
-            <div class="col-md-3"><div class="kpi kpi-neutral"><small>Anulados</small><h4 id="kpi-anulados">0.4K</h4></div></div>
+
+        <div id="row-atendidos" class="row g-3 my-3 d-none justify-content-center transition-fade">
+            <div class="col-md-3">
+                <div class="kpi kpi-ok-ok">
+                    <small>Atendido a Tiempo</small>
+                    <h4 id="kpi-atiempo">35.2K</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi kpi-bad-bad">
+                    <small>Fuera del Plazo</small>
+                    <h4 id="kpi-fplazo">6.1K</h4>
+                </div>
+            </div>
+        </div>
+
+        <div id="row-pendientes" class="row g-3 my-3 d-none justify-content-center transition-fade">
+            <div class="col-md-3">
+                <div class="kpi kpi-warn">
+                    <small>Observados</small>
+                    <h4 id="kpi-observados">1.2K</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi kpi-magenta">
+                    <small>En Trámite</small>
+                    <h4 id="kpi-entramite">7.3K</h4>
+                </div>
+            </div>
         </div>
         
         <div class="card-dark position-relative">
@@ -680,28 +773,49 @@ body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
 
             <div class="row">
               
-                <div class="col-md-8 position-relative"> <button id="btn-reset-map" class="map-overlay-btn btn-sm" style="display: none;">
-                <i class="fas fa-map-marked-alt"></i> Ver todo el Perú
-                </button>
-                <div id="mapChart" style="width: 100%; height: 600px;"></div>
+                <div class="col-md-7 position-relative"> 
+                    <button id="btn-reset-map" class="map-overlay-btn btn-sm" style="display: none;"><i class="fas fa-map-marked-alt"></i> Ver todo el Perú</button>
+                    <div id="mapChart" style="width: 100%; height: 600px;">
+
+                    </div>
                 </div>
 
-
-                
-                <div class="col-md-4">
-                    <div id="dept-detail-card" class="p-3 rounded" style="background: rgba(255,255,255,0.05);">
-                        <h5 id="dept-title" class="text-primary">Perú (General)</h5>
+                <div class="col-md-5">
+                    <div id="dept-detail-card" class="p-3 rounded" style="background: rgba(255,255,255,0.05); border-left: 3px solid #d633ff;">
+                        <h5 id="dept-title" class="text-primary fw-bold">Perú (General)</h5>
                         <hr class="border-secondary">
-                        <table class="table table-borderless text-white mb-2">
-                            <tbody id="dept-stats-body">
-                                </tbody>
-                        </table>
 
-                        <div id="dept-pie-container" style="margin-top: 10px;">
-                            <div id="dept-pie-chart" style="width: 100%; height: 200px;"></div>
+                        <div id="dept-ala-list-container" class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <small class="text-muted text-uppercase" style="font-size: 0.7rem; letter-spacing: 1px;">Resumen Nacional por AAA</small>
+                                <span id="ala-count-badge" class="badge bg-primary" style="font-size: 0.6rem;">15</span>
+                            </div>
+
+                            <div style="max-height: 450px; overflow-y: auto; scrollbar-width: thin; overflow-x: hidden;">
+                                <table class="table table-dark table-hover table-sm" style="background: transparent; font-size: 0.85rem; width: 100%;">
+                                    <thead class="sticky-top bg-dark" style="z-index: 1;">
+                                        <tr class="text-muted border-bottom border-secondary">
+                                            <th style="min-width: 140px;">Unidad</th>
+                                            <th class="text-end">Ing.</th>
+                                            <th class="text-end">A Tpo.</th>
+                                            <th class="text-end">F. Pzo.</th>
+                                            <th class="text-end">Pend.</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ala-list-body">  
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted small py-4">
+                                                <i class="fas fa-spinner fa-spin me-2"></i>Cargando datos...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
+                               
+                
             </div>
         </div>
 
@@ -821,7 +935,7 @@ body { background: #020c2b; color: white; font-family: 'Inter', sans-serif; }
 
 
 
-        <div class="row g-3">
+        <div class="row g-3" hidden>
             <div class="col-lg-8">
                 <div class="card-dark">
                     <h6 class="mb-4">Validaciones por usuario: Ingresados</h6>
@@ -956,7 +1070,10 @@ let miniPieChart;
 let estadosChart, tupaChart;
 let peruMapChart;
 let slaChart;
-
+let geojsonGlobalAAA; // Para no re-cargar los archivos en cada click
+let currentGeojsonLevel; // Para saber qué estamos dibujando actualmente
+// Al inicio de tu script
+let geojsonGlobalALA = null;
 
 // Datos base para la jerarquía
 const officeStructure = [
@@ -973,9 +1090,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Escuchar cambios en el filtro de meses propio
     document.getElementById('officeMonthFilter').addEventListener('change', renderOfficeTable);
     // También debe reaccionar al cambio de año global
+    
+    
+    
+        // Listener para el Cambio de Año
     document.getElementById('yearFilter').addEventListener('change', () => {
         initOfficeMonthFilter();
         renderOfficeTable();
+        // Actualizar el mapa
+        ActualizarDatosMapa();
+    });
+    // Listener para el Filtro del Mapa (TUPA / NO TUPA)
+    document.getElementById('mapFilter').addEventListener('change', () => {
+        ActualizarDatosMapa();
     });
 });
 
@@ -1145,91 +1272,29 @@ function updateDashboardData() {
         { name: 'NO TUPA', y: getRandVal(), color: '#5e5ce6' }
     ]);
 }
-function renderDeptPie(onTime, late) {
-    const total = onTime + late;
-    // Formatear el total (ej. 12.5K si es mayor a 1000)
-    const formattedTotal = total >= 1000 ? (total / 1000).toFixed(1) + 'K' : total;
 
-    if (miniPieChart) {
-        // Actualizar datos
-        miniPieChart.series[0].setData([
-            { name: 'A Tiempo', y: onTime, color: '#28a745' },
-            { name: 'Fuera de Plazo', y: late, color: '#dc3545' }
-        ]);
-        
-        // Actualizar el texto central
-        miniPieChart.setTitle({
-            text: `<span style="color: #5e5ce6; font-size: 12px;">Total</span><br/><span style="color: #ffffff; font-size: 20px; font-weight: bold;">${formattedTotal}</span>`
-        });
-
-    } else {
-        miniPieChart = Highcharts.chart('dept-pie-chart', {
-            chart: {
-                type: 'pie',
-                backgroundColor: 'transparent',
-                height: 250,
-                margin: [0, 0, 40, 0] // Espacio para la leyenda
-            },
-            // Título central estilo Foto 2
-            title: {
-                text: `<span style="color: #5e5ce6; font-size: 12px;">Total</span><br/><span style="color: #ffffff; font-size: 20px; font-weight: bold;">${formattedTotal}</span>`,
-                align: 'center',
-                verticalAlign: 'middle',
-                y: 10,
-                useHTML: true
-            },
-            tooltip: {
-                backgroundColor: 'rgba(10, 16, 36, 0.9)',
-                borderColor: '#d633ff',
-                borderRadius: 8,
-                style: { color: '#ffffff' },
-                pointFormat: '<b>{point.name}</b>: {point.y} ({point.percentage:.1f}%)'
-            },
-            plotOptions: {
-                pie: {
-                    innerSize: '75%', // Dona delgada como la Foto 2
-                    borderRadius: 5,   // Bordes redondeados en los segmentos
-                    borderWidth: 0,
-                    dataLabels: {
-                        enabled: true,
-                        useHTML: true,
-                        // Recuadro blanco con sombra como la Foto 2
-                        format: '<b>{point.y}</b><br/>{point.percentage:.0f}%',
-                        distance: -30, // Posiciona sobre el segmento
-                        style: {
-                            color: '#000000',
-                            fontSize: '10px',
-                            fontWeight: 'normal',
-                            textOutline: 'none'
-                        },
-                        backgroundColor: '#ffffff',
-                        padding: 5,
-                        borderRadius: 4,
-                        shadow: true
-                    },
-                    showInLegend: true
-                }
-            },
-            legend: {
-                itemStyle: { color: '#ffffff', fontSize: '11px', fontWeight: 'normal' },
-                itemHoverStyle: { color: '#d633ff' },
-                verticalAlign: 'bottom',
-                layout: 'horizontal',
-                symbolRadius: 6
-            },
-            series: [{
-                name: 'Estado',
-                data: [
-                    { name: 'A Tiempo', y: onTime, color: '#28a745' },
-                    { name: 'Fuera de Plazo', y: late, color: '#dc3545' }
-                ]
-            }],
-            credits: { enabled: false }
-        });
-    }
-}
 
 document.addEventListener("DOMContentLoaded", function () {
+
+    // 1. Inicializar los KPIs (Ocultar filas de detalle)
+    resetSecondaryRows();
+
+    PlotearGrafico();
+
+    // Configurar el botón de Reset
+    const btnReset = document.getElementById('btn-reset-map');
+    if (btnReset) {
+        btnReset.addEventListener('click', function() {
+            this.style.display = 'none';
+            document.getElementById('dept-title').innerText = "Perú (General)";
+            document.getElementById('ala-list-body').innerHTML = '<tr><td colspan="2" class="text-center text-muted">Seleccione una AAA</td></tr>';
+            document.getElementById('ala-count-badge').innerText = '0';
+            PlotearGrafico(); // Recarga la vista AAA
+        });
+    }
+
+
+
     const getKpiVal = () => (Math.random() * (20 - 10) + 10).toFixed(1) + 'K';
     const yearSelect = document.getElementById('yearFilter');
     const monthSelect = document.getElementById('monthFilter');
@@ -1571,248 +1636,8 @@ document.addEventListener("DOMContentLoaded", function () {
     // Carga inicial
     updateDashboardData();
 
-// MAPA
 
-
-// 1. PRIMERO: Definir los datos (Scope Global)
-const rawData = [
-    { ubigeo: '15', departamentoNombre: 'Lima', total: 500000, count: 120 },
-    { ubigeo: '01', departamentoNombre: 'Amazonas', total: 200000, count: 60 },
-    { ubigeo: '04', departamentoNombre: 'Arequipa', total: 300000, count: 80 },
-    { ubigeo: '08', departamentoNombre: 'Cusco', total: 280000, count: 75 },
-    { ubigeo: '20', departamentoNombre: 'Piura', total: 250000, count: 90 },
-    { ubigeo: '13', departamentoNombre: 'La Libertad', total: 270000, count: 85 },
-    { ubigeo: '16', departamentoNombre: 'Loreto', total: 180000, count: 55 },
-    { ubigeo: '11', departamentoNombre: 'Ica', total: 220000, count: 70 },
-    { ubigeo: '06', departamentoNombre: 'Cajamarca', total: 150000, count: 50 },
-    { ubigeo: '21', departamentoNombre: 'Puno', total: 140000, count: 45 },
-    { ubigeo: '12', departamentoNombre: 'Junín', total: 210000, count: 65 },
-    { ubigeo: '22', departamentoNombre: 'San Martín', total: 130000, count: 40 },
-    { ubigeo: '02', departamentoNombre: 'Áncash', total: 195000, count: 60 }
-];
-
-const ubigeoToHCMap = {
-    '01': 'pe-am', '02': 'pe-an', '03': 'pe-ap', '04': 'pe-ar',
-    '05': 'pe-ay', '06': 'pe-cj', '07': 'pe-3341', '08': 'pe-cs',
-    '09': 'pe-hv', '10': 'pe-hc', '11': 'pe-ic', '12': 'pe-ju',
-    '13': 'pe-ll', '14': 'pe-lb', '15': 'pe-lr', '16': 'pe-lo',
-    '17': 'pe-md', '18': 'pe-mq', '19': 'pe-pa', '20': 'pe-pi',
-    '21': 'pe-cl', '22': 'pe-sm', '23': 'pe-ta', '24': 'pe-tu', '25': 'pe-uc',
-};
-// Función para generar números entre 5000 y 10000
-const getRandMap = () => Math.floor(Math.random() * (10000 - 5000 + 1)) + 5000;
-
-function updateMapData() {
-    return rawData.map(item => ({
-        'hc-key': ubigeoToHCMap[item.ubigeo],
-        value: getRandMap(), // Cantidad dinámica para el mapa
-        onTime: Math.floor(Math.random() * (7000 - 5000 + 1)) + 5000,
-        late: Math.floor(Math.random() * (2000 - 1000 + 1)) + 1000,
-        name: item.departamentoNombre
-    })).filter(d => d['hc-key']);
-}
-
-fetch('js/peru_highcharts.json')
-    .then(res => res.json())
-    .then(topology => {
-        // Guardamos la instancia en la variable global
-        peruMapChart = Highcharts.mapChart('mapChart', {
-            chart: {
-                map: topology,
-                backgroundColor: 'transparent',
-                events: {
-                    load: function() {
-                        // Selección inicial por defecto
-                        showDeptDetail(this.series[0].data[0]); 
-                    }
-                }
-            },
-            title: { text: '' },
-
-            exporting: {
-                enabled: true,
-                buttons: {
-                    contextButton: {
-                        align: 'left',        // Alineado a la izquierda
-                        verticalAlign: 'top', // En la parte superior
-                        x: 10,
-                        y: 10,
-                        theme: {
-                            fill: '#1a223f',  // Fondo oscuro como tu card
-                            stroke: '#d633ff',
-                            states: {
-                                hover: { fill: '#d633ff' } // Cambio a morado al pasar el mouse
-                            }
-                        }
-                    }
-                }
-            },
-
-            
-            // DESACTIVAR ZOOM CON SCROLL, PERO MANTENER BOTONES
-            mapNavigation: {
-                enabled: true,
-                enableMouseWheelZoom: false, // <-- Esto evita el agrandado accidental
-                buttonOptions: {
-                    verticalAlign: 'bottom',
-                    align: 'left',
-                    theme: { fill: '#1a223f', 'stroke-width': 1, stroke: '#d633ff', style: { color: 'white' } }
-                }
-            },
-
-            colorAxis: {
-                min: 5000,
-                max: 10000,
-                minColor: '#1a223f',
-                maxColor: '#d633ff', // Degradado hacia el morado neón
-                stops: [
-                    [0, '#1a223f'],
-                    [0.5, '#5e5ce6'],
-                    [1, '#d633ff']
-                ]
-            },
-
-            series: [{
-                data: updateMapData(),
-                name: 'Registros',
-                borderColor: '#2d375a',
-                borderWidth: 0.5,
-                states: {
-                    hover: { color: '#f3ba2f' },
-                    select: { color: '#f3ba2f', borderColor: 'white' }
-                },
-                allowPointSelect: true,
-                cursor: 'pointer',
-                events: {
-                    click: function(e) {
-                        showDeptDetail(e.point);
-                        // MOSTRAR el botón cuando se hace clic en un departamento
-                        document.getElementById('btn-reset-map').style.display = 'block';
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}',
-                    style: { fontSize: '9px', color: '#fff', textOutline: 'none' }
-                }
-            }],
-            tooltip: {
-                backgroundColor: '#1a223f',
-                style: { color: '#fff' },
-                pointFormat: '{point.name}: <b>{point.value} registros</b>'
-            },
-            legend: { enabled: false }
-        });
-
-        // EVENTO DEL COMBO (TODOS, TUPA, NO TUPA)
-        document.getElementById('mapFilter').addEventListener('change', function() {
-            peruMapChart.series[0].setData(updateMapData());
-        });
-    });
-
-document.getElementById('btn-reset-map').addEventListener('click', function() {
-    // 1. Ocultar este botón
-    this.style.display = 'none';
-
-    // 2. Deseleccionar cualquier departamento en el mapa
-    if (peruMapChart) {
-        peruMapChart.series[0].points.forEach(p => p.setState(''));
-        
-        // 3. (Opcional) Regresar el detalle lateral a Lima o a un resumen general
-        // Aquí usamos el primer dato de la serie como "resumen inicial"
-        showDeptDetail(peruMapChart.series[0].data[0]); 
-        
-        // 4. Si quieres que el título diga "Perú (General)" de nuevo:
-        document.getElementById('dept-title').innerText = "Perú (General)";
-
-         // 2. Actualizar Título dinámico (el que va sobre los gráficos de abajo)
-        const dynamicTitle = document.getElementById('selected-dept-name');
-        if (dynamicTitle) dynamicTitle.innerText = "Perú (General)";
-        
-        // 5. Resetear el zoom si el usuario lo movió
-        peruMapChart.mapZoom();
-    }
-});
-
-// 2. Función para disparar el efecto visual y actualización
-function refreshMapByYear() {
-    if (!peruMapChart) return;
-
-    // Efecto visual de "parpadeo" o carga en el contenedor del mapa
-    const container = document.getElementById('mapChart');
-    container.style.opacity = '0.5';
-    container.style.transition = 'opacity 0.2s';
-
-    setTimeout(() => {
-        // Genera nuevos datos aleatorios (usando tu función getRandMap existente)
-        const newData = updateMapData();
-        
-        // Actualiza el mapa con animación
-        peruMapChart.series[0].setData(newData, true, { duration: 800 });
-
-        // Actualiza el detalle lateral con el primer punto para que los números también cambien
-        showDeptDetail(peruMapChart.series[0].data[0]);
-
-        container.style.opacity = '1';
-    }, 200);
-}
-// 3. Vincular al evento de cambio de año (Añadir esto a tu DOMContentLoaded)
-document.getElementById('yearFilter').addEventListener('change', function() {
-    refreshMapByYear();
-});
-
-// ACTUALIZACIÓN DE LA FUNCIÓN showDeptDetail
-function showDeptDetail(point) {
-    // 1. Datos base del departamento
-    const total = point.value || 0;
-    const onTime = point.onTime || 0;
-    const late = point.late || 0;
-    const pct = total > 0 ? ((onTime / total) * 100).toFixed(1) : 0;
-    const name = point.name || "Perú";
-
-    // 2. Actualizar Título dinámico (el que va sobre los gráficos de abajo)
-    const dynamicTitle = document.getElementById('selected-dept-name');
-    if (dynamicTitle) dynamicTitle.innerText = name;
-
-    // 3. Actualizar Tabla Lateral (Tu código original mejorado)
-    document.getElementById('dept-title').innerText = name;
-    document.getElementById('dept-stats-body').innerHTML = `
-        <tr>
-            <td><small class="">Total Registros</small><br><strong style="font-size: 1.2rem;">${total.toLocaleString()}</strong></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td colspan="2">
-                <div class="progress" style="height: 5px; background: #2d375a;">
-                    <div class="progress-bar bg-success" style="width: ${pct}%"></div>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <td><small class="">A Tiempo</small><br><span class="text-success">${onTime.toLocaleString()}</span></td>
-            <td><small class="">Fuera Plazo</small><br><span class="text-danger">${late.toLocaleString()}</span></td>
-        </tr>
-    `;
-
-    // 4. Actualizar el Pie pequeño del detalle
-    renderDeptPie(onTime, late);
-
-    // 5. NUEVO: Actualizar KPIs Superiores (Rango 10k - 20k)
-    const formatK = (val) => (val / 1000).toFixed(1) + 'K';
-    const randK = () => Math.floor(Math.random() * (20000 - 10000 + 1)) + 10000;
-
-    const kpiIds = ['kpi-total', 'kpi-ingresados', 'kpi-atendidos', 'kpi-pendientes', 'kpi-atiempo', 'kpi-fplazo', 'kpi-observados', 'kpi-anulados'];
-    kpiIds.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.innerText = formatK(randK());
-    });
-    // Al hacer clic en el mapa, refrescamos el gráfico de SLA
-    updateSlaChart();
-
-    // 6. NUEVO: Sincronizar todos los gráficos grandes
-    actualizarGraficosRelacionados();
-    
-}
+ 
 
 // Función auxiliar para generar datos aleatorios en los gráficos al hacer clic
 function actualizarGraficosRelacionados() {
@@ -1844,6 +1669,594 @@ function actualizarGraficosRelacionados() {
 
 
 });
+
+
+
+function showDeptDetail(point) {
+    // 1. Extraer datos numéricos
+    const total = point.value || 0;
+    const onTime = point.onTime || Math.floor(total * 0.7);
+    const late = point.late || (total - onTime);
+    const pct = total > 0 ? ((onTime / total) * 100).toFixed(1) : 0;
+
+    // 2. DETECTAR TIPO DE PUNTO (Sede Central, AAA o ALA)
+    const isSedeCentral = point.id === 'sede-central' || point.name === 'Sede Central' || (point.properties && point.properties.NAME === 'SEDE CENTRAL');
+    const isAAA = point.properties && point.properties.COD_ROMAN && !point.properties.COD_ALA;
+    
+    const name = isSedeCentral ? "Sede Central" : 
+                 (point.properties && (point.properties.NAME_AAA || point.properties.NAME_ALA)) || point.name || "Perú";
+
+    // 3. Actualizar Título dinámico
+    const dynamicTitle = document.getElementById('selected-dept-name');
+    if (dynamicTitle) dynamicTitle.innerText = name;
+
+    // 4. Actualizar Tabla Lateral Superior (KPIs de la Card)
+    const deptTitleElem = document.getElementById('dept-title');
+    if (deptTitleElem) deptTitleElem.innerText = name;
+
+
+    // 5. LÓGICA DE LA TABLA INFERIOR (DESGLOSE)
+    if (isSedeCentral) {
+        console.log("Cargando oficinas de Sede Central...");
+        renderSedeCentralTable(); // Llamamos a la nueva función
+    } else if (isAAA) {
+        const codigoBusqueda = point.properties.COD_ROMAN || point.properties.CODE_AAA;
+        if (typeof renderALATable === "function") {
+            renderALATable(codigoBusqueda);
+        }
+    } else {
+        console.log("Clic en ALA: Manteniendo lista actual.");
+    }
+
+    
+
+    // 7. Sincronizar el resto de funciones
+    if (typeof updateSlaChart === "function") updateSlaChart();
+    if (typeof actualizarGraficosRelacionados === "function") actualizarGraficosRelacionados();
+}
+
+
+function showRow(rowId) {
+    // 1. Primero ocultamos TODAS las filas secundarias para que no se traslapen
+    document.getElementById('row-atendidos').classList.add('d-none');
+    document.getElementById('row-pendientes').classList.add('d-none');
+    
+    // 2. Mostramos la fila solicitada que corresponde al clic
+    const targetRow = document.getElementById(rowId);
+    if (targetRow) {
+        targetRow.classList.remove('d-none');
+    }
+}
+
+// Función para resetear (ocultar todo) al hacer clic en "Total"
+function resetSecondaryRows() {
+    document.getElementById('row-atendidos').classList.add('d-none');
+    document.getElementById('row-pendientes').classList.add('d-none');
+}
+
+
+function renderSedeCentralTable() {
+    const listBody = document.getElementById('ala-list-body');
+    const badge = document.getElementById('ala-count-badge');
+    const sourceRows = document.querySelectorAll('#officeTableBody tr');
+
+    if (!listBody) return;
+
+    let html = '';
+    let count = 0;
+
+    // Recorremos las filas de la tabla de oficinas principal
+    sourceRows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 2) {
+            const nombreOficina = cells[0].innerText.trim();
+            const cantidad = cells[1].innerText.trim();
+            count++;
+
+            html += `
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <td class="py-2" style="font-size: 0.8rem;">
+                        <i class="fas fa-building text-info me-2"></i>${nombreOficina}
+                    </td>
+                    <td class="text-end py-2 font-monospace text-info" style="font-size: 0.85rem;">
+                        ${cantidad}
+                    </td>
+                </tr>
+            `;
+        }
+    });
+
+    // Actualizar el número de oficinas encontradas
+    if (badge) badge.innerText = count;
+
+    // Si no hay filas en la tabla principal, mostrar mensaje
+    listBody.innerHTML = html || '<tr><td colspan="2" class="text-center text-muted small py-3">No hay oficinas para mostrar</td></tr>';
+}
+
+
+
+function generarDatosFicticios(listaCodigos, llave) {
+    return listaCodigos.map(codigo => {
+        const total = Math.floor(Math.random() * 250000) + 10000;
+        const atendidosTiempo = Math.floor(total * 0.75);
+        const atendidosFuera = Math.floor(total * 0.15);
+        const pendientes = total - (atendidosTiempo + atendidosFuera);
+
+        return {
+            [llave]: codigo,
+            value: total, // Sigue sirviendo para el color del mapa
+            atendidosTiempo: atendidosTiempo,
+            atendidosFuera: atendidosFuera,
+            pendientes: pendientes
+        };
+    });
+}
+
+async function PlotearGrafico() {
+    try {
+        const resAAA = await fetch('js/AAA_GEO.js');
+        const resALA = await fetch('js/ALA_GEO.js');
+        const geojsonAAA = await resAAA.json();
+        const geojsonALA = await resALA.json();
+
+        geojsonGlobalAAA = geojsonAAA;
+        geojsonGlobalALA = geojsonALA;
+
+        
+        
+
+        // Extraemos las propiedades de cada feature para tener el nombre completo y el romano
+        const dataAAA = geojsonAAA.features.map(f => {
+        const total = Math.floor(Math.random() * 250000) + 10000;
+        const atendidosTiempo = Math.floor(total * 0.75);
+        const atendidosFuera = Math.floor(total * 0.15);
+        const pendientes = total - (atendidosTiempo + atendidosFuera);
+
+        return {
+            COD_ROMAN: f.properties.COD_ROMAN, // Se usa para el joinBy del mapa
+            NAME_AAA: f.properties.NAME_AAA,   // <--- ESTO ES LO QUE APARECERÁ EN LA TABLA
+            value: total,
+            atendidosTiempo: atendidosTiempo,
+            atendidosFuera: atendidosFuera,
+            pendientes: pendientes
+        };
+    });
+
+
+
+        peruMapChart = Highcharts.mapChart('mapChart', {
+            chart: {
+                map: geojsonAAA,
+                backgroundColor: 'transparent'
+            },
+            title: { text: '' },
+            subtitle: { 
+                text: 'Ámbito: Autoridades Administrativas del Agua (AAA)',
+                style: { color: '#9aa4c7' }
+            },
+            mapNavigation: {
+                enabled: true,
+                enableMouseWheelZoom: false,
+                buttonOptions: {
+                    verticalAlign: 'bottom',
+                    align: 'left',
+                    theme: { fill: '#1a223f', stroke: '#d633ff', style: { color: 'white' } }
+                }
+            },
+            colorAxis: {
+                min: 0,
+                max: 300000,
+                stops: [[0, '#1a223f'], [0.5, '#3498db'], [1, '#d633ff']]
+            },
+            tooltip: {
+                backgroundColor: 'rgba(26, 34, 63, 0.9)',
+                style: { color: '#ffffff' },
+                borderWidth: 1,
+                borderColor: '#d633ff',
+                headerFormat: '',
+                pointFormatter: function () {
+                    const nombre = this.properties ? this.properties.NAME_AAA : this.name;
+                    return `<span style="color:#d633ff; font-weight:bold; font-size:1.1em;">${nombre}</span><br/>` +
+                           `<span style="color:#9aa4c7;">Cantidad:</span> <b>${this.value.toLocaleString()}</b> expedientes`;
+                }
+            },
+            plotOptions: {
+                series: {
+                    cursor: 'pointer',
+                    borderColor: 'rgba(255,255,255,0.2)',
+                    states: { hover: { color: '#f3ba2f' } },
+                    dataLabels: {
+                        enabled: true,
+                        format: '{point.properties.COD_ROMAN}',
+                        style: { color: '#fff', textOutline: 'none' }
+                    },
+                    events: {
+                        click: function (e) {
+                            const props = e.point.properties;
+                            if(!props) return; // Si es Sede Central, manejado abajo
+
+                            showDeptDetail(e.point);
+
+                            // Filtrar y generar datos para ALAs
+                            const featuresALA = geojsonGlobalALA.features.filter(f => f.properties.COD_ROMAN === props.COD_ROMAN);
+                            const nombresALA = featuresALA.map(f => f.properties.NAME_ALA);
+                            const dataALA = generarDatosFicticios(nombresALA, 'NAME_ALA');
+                            const geojsonFiltrado = { type: "FeatureCollection", features: featuresALA };
+
+                            MostrarAmbitoALA(props.NAME_AAA, geojsonFiltrado, dataALA);
+                            
+                            // ACTUALIZAR TABLA CON ALAS
+                            actualizarTablaDesglose(props.NAME_AAA, dataALA, true);
+                            
+                            document.getElementById('btn-reset-map').style.display = 'block';
+                        }
+                    }
+                }
+            },
+            series: [
+                {
+                    id: 'serie-aaa',
+                    data: dataAAA,
+                    joinBy: ['COD_ROMAN', 'COD_ROMAN'],
+                    name: 'Expedientes AAA',
+                    nullColor: '#1a223f',
+                    zIndex: 1
+                },
+                {
+                    type: 'mappoint',
+                    name: 'Sede Central',
+                    id: 'sede-central',
+                    zIndex: 5,
+                    data: [{
+                        name: 'SEDE CENTRAL - ANA',
+                        x: -77.0282, 
+                        y: -12.0431,
+                        id: 'sede-central',
+                        value: 285000, 
+                        atendidosTiempo: 210000,
+                        atendidosFuera: 40000,
+                        pendientes: 35000
+                    }],
+                    color: '#00f2fe',
+                    marker: { symbol: 'square', radius: 10, lineWidth: 2, lineColor: '#ffffff' },
+                    point: {
+                        events: {
+                            click: function() {
+                                showDeptDetail(this);
+                                // Opcional: Podrías mostrar solo la sede central en la tabla
+                                actualizarTablaDesglose("Sede Central", [this], true);
+
+
+                                                    // Cambiamos el label del contenedor
+                                const containerLabel = document.querySelector('#dept-ala-list-container small');
+                                if (containerLabel) containerLabel.innerText = "DESGLOSE SEDE CENTRAL: DIRECCIONES";
+
+                                // Pasamos los datos reales del punto (this) para dividirlos
+                                renderOfficeTableInSidebar(this);
+
+                                document.getElementById('btn-reset-map').style.display = 'block';
+                            }
+                        }
+                    }
+                }
+            ]
+        });
+
+        // --- VISTA INICIAL DE LA TABLA ---
+        // Combinamos AAA + Sede Central para el resumen nacional
+        const sedeCentral = peruMapChart.get('sede-central').points[0];
+        const sedeCentralPoint = peruMapChart.get('sede-central').points[0];
+
+                // Creamos el array base
+        let dataResumenNacional = [
+            {
+                name: 'SEDE CENTRAL', // Importante que coincida para el sorteo
+                value: sedeCentralPoint.value,
+                atendidosTiempo: sedeCentralPoint.atendidosTiempo,
+                atendidosFuera: sedeCentralPoint.atendidosFuera,
+                pendientes: sedeCentralPoint.pendientes
+            },
+            ...dataAAA // Esparcimos el resto de las AAA
+        ];
+
+        // ORDENAMIENTO: Sede Central primero, luego el resto por nombre
+        dataResumenNacional.sort((a, b) => {
+            if (a.name === 'SEDE CENTRAL') return -1;
+            if (b.name === 'SEDE CENTRAL') return 1;
+            // Opcional: ordenar las AAA alfabéticamente después de la sede
+            const nombreA = a.NAME_AAA || a.name || "";
+            const nombreB = b.NAME_AAA || b.name || "";
+            return nombreA.localeCompare(nombreB);
+        });
+        
+        actualizarTablaDesglose("Nacional", dataResumenNacional, false);
+
+        vincularFiltrosMapa();
+
+    } catch (error) {
+        console.error("Error cargando el mapa:", error);
+    }
+}
+// 2. Nueva función para escuchar los cambios en los combos
+function vincularFiltrosMapa() {
+    const filters = ['yearFilter', 'mapFilter'];
+    
+    filters.forEach(filterId => {
+        const element = document.getElementById(filterId);
+        if (element) {
+            element.addEventListener('change', () => {
+                const year = document.getElementById('yearFilter').value;
+                const tipo = document.getElementById('mapFilter').value;
+                
+                console.log(`Filtrando mapa por Año: ${year} y Tipo: ${tipo}`);
+                ActualizarDatosMapa();
+            });
+        }
+    });
+}
+// 3. Función para actualizar SOLO los datos sin reconstruir todo el mapa
+function ActualizarDatosMapa() {
+    if (!peruMapChart) return;
+
+    // 1. Obtener valores de los filtros
+    const selectedYear = document.getElementById('yearFilter').value;
+    const selectedType = document.getElementById('mapFilter').value;
+    
+    // 2. Determinar en qué nivel estamos (AAA o ALA)
+    const esNivelALA = document.getElementById('btn-reset-map').style.display === 'block';
+
+    if (esNivelALA) {
+        // Actualizar datos del desglose ALA actual
+        const featuresVisibles = peruMapChart.series[0].options.chart.map.features;
+        const nombresALA = featuresVisibles.map(f => f.properties.NAME_ALA);
+        const nuevosDatosALA = generarDatosFicticios(nombresALA, 'NAME_ALA');
+        
+        peruMapChart.series[0].setData(nuevosDatosALA);
+    } else {
+        // 1. Mapear nuevos datos AAA
+        let nuevosDatosAAA = geojsonGlobalAAA.features.map(f => ({
+            COD_ROMAN: f.properties.COD_ROMAN,
+            NAME_AAA: f.properties.NAME_AAA,
+            value: Math.floor(Math.random() * 250000) + 10000,
+            atendidosTiempo: 0, // ... tus cálculos
+            atendidosFuera: 0,
+            pendientes: 0
+        }));
+
+        // 2. Traer la Sede Central actual del gráfico
+        const sede = peruMapChart.get('sede-central').points[0];
+        const objetoSede = {
+            name: 'SEDE CENTRAL',
+            value: sede.value,
+            atendidosTiempo: sede.atendidosTiempo,
+            atendidosFuera: sede.atendidosFuera,
+            pendientes: sede.pendientes
+        };
+
+        // 3. Unir y Ordenar
+        const dataFinal = [objetoSede, ...nuevosDatosAAA].sort((a, b) => {
+            if (a.name === 'SEDE CENTRAL') return -1;
+            if (b.name === 'SEDE CENTRAL') return 1;
+            return (a.NAME_AAA || "").localeCompare(b.NAME_AAA || "");
+        });
+
+        // 4. Actualizar Mapa y Tabla
+        peruMapChart.get('serie-aaa').setData(nuevosDatosAAA); // El mapa solo recibe las AAA
+        actualizarTablaDesglose("Nacional", dataFinal, false); // La tabla recibe todo ordenado
+    }
+    
+    console.log(`Mapa actualizado para: ${selectedYear} | Filtro: ${selectedType}`);
+}
+
+function MostrarAmbitoALA(nombreAAA, geojsonFiltrado, dataALA) {
+    document.getElementById('dept-title').innerText = nombreAAA;
+    
+    // 1. Ocultar la Sede Central antes de actualizar el mapa
+    const sede = peruMapChart.get('sede-central');
+    if (sede) sede.setVisible(false, false); //
+
+    peruMapChart.update({
+        chart: { map: geojsonFiltrado },
+        subtitle: { text: `Desglose: Administraciones Locales del Agua (ALA) - ${nombreAAA}` },
+        
+        // CONFIGURACIÓN DEL TOOLTIP PARA ALA
+        tooltip: {
+            backgroundColor: 'rgba(26, 34, 63, 0.9)',
+            style: { color: '#ffffff' },
+            borderWidth: 1,
+            borderColor: '#00f2fe', // Borde Cian para nivel 2
+            headerFormat: '',
+            pointFormatter: function () {
+                return `<span style="color:#00f2fe; font-weight:bold; font-size:1.1em;">${this.properties.NAME_ALA}</span><br/>` +
+                       `<span style="color:#9aa4c7;">Cantidad:</span> <b>${this.value.toLocaleString()}</b> expedientes`;
+            }
+        },
+
+        series: [{
+            id: 'serie-aaa', // Reutilizamos el ID o Highcharts actualizará la serie 0 por defecto
+            data: dataALA,
+            joinBy: ['NAME_ALA', 'NAME_ALA'],
+            name: 'Expedientes ALA',
+            dataLabels: {
+                enabled: true,
+                format: '{point.properties.NAME_ALA}',
+                style: { 
+                    fontSize: '9px', 
+                    color: '#fff', 
+                    textOutline: 'none',
+                    fontWeight: 'normal' 
+                }
+            }
+        }]
+    });
+    
+    if (typeof actualizarGraficosRelacionados === "function") {
+        actualizarGraficosRelacionados();
+    }
+}
+
+
+function renderALATable(codRoman) {
+
+    const listBody = document.getElementById('ala-list-body');
+    if (!listBody) return;
+
+    // 1. Validar que tengamos los datos cargados
+    if (!geojsonGlobalALA || !geojsonGlobalALA.features) {
+        console.error("La variable geojsonGlobalALA está vacía.");
+        return;
+    }
+
+    // 2. Limpiar el código de búsqueda (ej: " I " -> "I")
+    const busqueda = String(codRoman).trim().toUpperCase();
+
+    // 3. Filtrar
+    const alasRelacionadas = geojsonGlobalALA.features.filter(f => {
+        const codEnGeojson = String(f.properties.COD_ROMAN || f.properties.COD_AAA || "").trim().toUpperCase();
+        return codEnGeojson === busqueda;
+    });
+
+    // 4. Construir el HTML
+    let html = '';
+    if (alasRelacionadas.length === 0) {
+        html = '<tr><td colspan="2" class="text-center text-muted small py-3">No se encontraron ALAs para esta AAA</td></tr>';
+    } else {
+        // Ordenar alfabéticamente
+        alasRelacionadas.sort((a, b) => a.properties.NAME_ALA.localeCompare(b.properties.NAME_ALA));
+
+        alasRelacionadas.forEach(ala => {
+            // Aquí simulas la cantidad o la traes de tus datos
+            const cant = Math.floor(Math.random() * 100) + 10; 
+            
+            html += `
+                <tr class="border-bottom border-secondary">
+                    <td class="py-2"><i class="fas fa-caret-right text-primary me-2"></i>${ala.properties.NAME_ALA}</td>
+                    <td class="text-end py-2 font-monospace text-info">${cant.toLocaleString()}</td>
+                </tr>`;
+        });
+    }
+
+    listBody.innerHTML = html;
+    
+    // Actualizar el contador si tienes el badge
+    const badge = document.getElementById('ala-count-badge');
+    if (badge) badge.innerText = alasRelacionadas.length;
+}
+function actualizarTablaDesglose(titulo, listaDatos, esNivelALA = false) {
+    const tbody = document.getElementById('ala-list-body');
+    const badge = document.getElementById('ala-count-badge');
+    const containerLabel = document.querySelector('#dept-ala-list-container small');
+
+    if (!tbody) return;
+
+    // 1. Actualizar textos de cabecera
+    if (containerLabel) {
+        containerLabel.innerText = esNivelALA ? `DESGLOSE POR ALA: ${titulo}` : "RESUMEN NACIONAL POR AAA";
+    }
+    if (badge) badge.innerText = listaDatos.length;
+
+    tbody.innerHTML = '';
+
+    // 2. Generar filas con lógica de nombres corregida
+    listaDatos.forEach(item => {
+        let nombreMostrado = "";
+        
+        if (esNivelALA) {
+            // Si es vista de detalle, usamos el nombre de la ALA
+            nombreMostrado = item.NAME_ALA || "Unidad Local";
+        } else {
+            // Si es vista General:
+            // Prioridad 1: NAME_AAA (Nombres como "Caplina Ocoña", "Cañete Fortaleza")
+            // Prioridad 2: item.name (Para la Sede Central que definimos como {name: 'SEDE CENTRAL'})
+            // Prioridad 3: COD_ROMAN (Como respaldo si no hay nombre largo)
+            nombreMostrado = item.NAME_AAA || item.name || item.COD_ROMAN || "Sede Central";
+        }
+        
+        const filaHTML = `
+            <tr class="border-bottom border-secondary-subtle">
+                <td class="py-2">
+                    <span class="text-info fw-medium">${nombreMostrado}</span>
+                </td>
+                <td class="text-end py-2 fw-bold">
+                    ${(item.value || 0).toLocaleString()}
+                </td>
+                <td class="text-end py-2 text-success">
+                    ${(item.atendidosTiempo || 0).toLocaleString()}
+                </td>
+                <td class="text-end py-2 text-warning">
+                    ${(item.atendidosFuera || 0).toLocaleString()}
+                </td>
+                <td class="text-end py-2 text-danger">
+                    ${(item.pendientes || 0).toLocaleString()}
+                </td>
+            </tr>`;
+        
+        tbody.insertAdjacentHTML('beforeend', filaHTML);
+    });
+}
+function renderOfficeTableInSidebar(sedeData) {
+    const tbody = document.getElementById('ala-list-body');
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    // Definimos pesos para cada oficina para que la distribución no sea puramente aleatoria
+    // La suma de estos pesos es 100
+    const weights = { 'OA': 35, 'DSNIRH': 25, 'DCERH': 20, 'DPDRH': 20 };
+
+    officeStructure.forEach(dir => {
+        const peso = weights[dir.id] / 100;
+        
+        // Dividimos los totales de la sede según el peso de la oficina
+        const totalDir = Math.round(sedeData.value * peso);
+        const atendidosTpoDir = Math.round(sedeData.atendidosTiempo * peso);
+        const atendidosFueraDir = Math.round(sedeData.atendidosFuera * peso);
+        const pendientesDir = Math.round(sedeData.pendientes * peso);
+
+        const hasChildren = dir.children.length > 0;
+        const row = document.createElement('tr');
+        row.className = "border-bottom border-secondary-subtle";
+        row.style.cursor = hasChildren ? 'pointer' : 'default';
+        
+        row.innerHTML = `
+            <td class="py-2">
+                <span class="text-info fw-medium">
+                    ${hasChildren ? `<i class="fas fa-chevron-right me-1 small" id="icon-${dir.id}"></i>` : ''}
+                    ${dir.name}
+                </span>
+            </td>
+            <td class="text-end py-2 fw-bold">${totalDir.toLocaleString()}</td>
+            <td class="text-end py-2 text-success">${atendidosTpoDir.toLocaleString()}</td>
+            <td class="text-end py-2 text-warning">${atendidosFueraDir.toLocaleString()}</td>
+            <td class="text-end py-2 text-danger">${pendientesDir.toLocaleString()}</td>
+        `;
+
+        if (hasChildren) {
+            row.onclick = () => toggleSubTable(dir.id);
+        }
+        tbody.appendChild(row);
+
+        // Distribución para los hijos (Sub-unidades)
+        if (hasChildren) {
+            const numChildren = dir.children.length;
+            dir.children.forEach(sub => {
+                const subRow = document.createElement('tr');
+                subRow.className = `d-none sub-${dir.id} bg-dark bg-opacity-50`;
+                
+                // Dividimos el total de la dirección equitativamente entre sus hijos
+                const totalSub = Math.round(totalDir / numChildren);
+                
+                subRow.innerHTML = `
+                    <td class="py-1 ps-4 small">└ ${sub}</td>
+                    <td class="text-end py-1 small">${totalSub.toLocaleString()}</td>
+                    <td class="text-end py-1 small text-success">${Math.round(atendidosTpoDir / numChildren).toLocaleString()}</td>
+                    <td class="text-end py-1 small text-warning">${Math.round(atendidosFueraDir / numChildren).toLocaleString()}</td>
+                    <td class="text-end py-1 small text-danger">${Math.round(pendientesDir / numChildren).toLocaleString()}</td>
+                `;
+                tbody.appendChild(subRow);
+            });
+        }
+    });
+}
 </script>
 
 </body>
