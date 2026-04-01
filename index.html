@@ -11,11 +11,28 @@
 <script src="js/highcharts.js"></script>
 <script src="js/exporting.js"></script>
 <script src="js/accessibility.js"></script>
+<script src="js/highcharts-more.js"></script>
+<script src="js/solid-gauge.js"></script>
 <script src="js/map.js"></script>
 <script src="https://code.highcharts.com/mapdata/countries/pe/pe-all.js"></script>
 
 
+
 <style>
+    .table>:not(caption)>*>* {
+    padding: .5rem .5rem;
+    color: var(--bs-table-color-state, var(--bs-table-color-type, var(--bs-table-color)));
+    background-color: #142044;
+    border-bottom-width: var(--bs-border-width);
+    box-shadow: inset 0 0 0 9999px var(--bs-table-bg-state, var(--bs-table-bg-type, var(--bs-table-accent-bg)));
+}
+    #mapChart {
+        width: 100%;
+        /* Aumentamos de los clásicos 500px a 800px o 85vh */
+        height: 800px; 
+        margin: 0 auto;
+        background-color: transparent;
+    }
     /* Estilos para el botón flotante sobre el mapa */
     .map-overlay-btn {
         position: absolute; /* Esto lo hace flotar */
@@ -761,6 +778,24 @@
             </div>
         </div>
         
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="card-dark p-3 h-100 text-center">
+                    <h6 class="text-white mb-2" style="font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Eficiencia del Trámite (Sin Quejas)</h6>
+                    <div id="gauge-eficiencia" style="height: 220px; width: 100%;"></div>
+                    <p class="small mt-n2">Porcentaje de expedientes sin incidencias</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-dark p-3 h-100 text-center">
+                    <h6 class="text-white mb-2" style="font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase;">Índice de Celeridad (En Plazo)</h6>
+                    <div id="gauge-celeridad" style="height: 220px; width: 100%;"></div>
+                    <p class="small mt-n2">Cumplimiento de plazos a nivel nacional</p>
+                </div>
+            </div>
+        </div>
+
+
         <div class="card-dark position-relative">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6>Ingresados - Distribución Geográfica</h6>
@@ -770,12 +805,13 @@
                     <option value="NO TUPA">NO TUPA</option>
                 </select>
             </div>
+            
 
             <div class="row">
               
                 <div class="col-md-7 position-relative"> 
                     <button id="btn-reset-map" class="map-overlay-btn btn-sm" style="display: none;"><i class="fas fa-map-marked-alt"></i> Ver todo el Perú</button>
-                    <div id="mapChart" style="width: 100%; height: 600px;">
+                    <div id="mapChart" style="width: 100%; height: 850px;">
 
                     </div>
                 </div>
@@ -791,7 +827,7 @@
                                 <span id="ala-count-badge" class="badge bg-primary" style="font-size: 0.6rem;">15</span>
                             </div>
 
-                            <div style="max-height: 450px; overflow-y: auto; scrollbar-width: thin; overflow-x: hidden;">
+                            <div style="max-height: 700px; overflow-y: auto; scrollbar-width: thin; overflow-x: hidden;">
                                 <table class="table table-dark table-hover table-sm" style="background: transparent; font-size: 0.85rem; width: 100%;">
                                     <thead class="sticky-top bg-dark" style="z-index: 1;">
                                         <tr class="text-muted border-bottom border-secondary">
@@ -1099,6 +1135,8 @@ document.addEventListener('DOMContentLoaded', function() {
         renderOfficeTable();
         // Actualizar el mapa
         ActualizarDatosMapa();
+        // ESTO ES LO QUE HACER QUE SE MUEVAN LOS TACÓMETROS:
+        actualizarTacometrosConFicticios();
     });
     // Listener para el Filtro del Mapa (TUPA / NO TUPA)
     document.getElementById('mapFilter').addEventListener('change', () => {
@@ -1282,17 +1320,42 @@ document.addEventListener("DOMContentLoaded", function () {
     PlotearGrafico();
 
     // Configurar el botón de Reset
-    const btnReset = document.getElementById('btn-reset-map');
+   const btnReset = document.getElementById('btn-reset-map');
+
     if (btnReset) {
         btnReset.addEventListener('click', function() {
+            // 1. Ocultar el botón y resetear textos
             this.style.display = 'none';
             document.getElementById('dept-title').innerText = "Perú (General)";
             document.getElementById('ala-list-body').innerHTML = '<tr><td colspan="2" class="text-center text-muted">Seleccione una AAA</td></tr>';
             document.getElementById('ala-count-badge').innerText = '0';
-            PlotearGrafico(); // Recarga la vista AAA
+
+            // 2. LIMPIEZA DE SERIES DE NIVEL ALA
+            // Buscamos la serie de burbujas de las ALAs y la eliminamos por completo
+            const serieBurbujasALA = peruMapChart.get('burbujas-ala');
+            if (serieBurbujasALA) {
+                serieBurbujasALA.remove(false); // false para que no redibuje aún, optimiza carga
+            }
+
+            // 3. RESTAURAR VISIBILIDAD NACIONAL
+            // Aseguramos que las burbujas nacionales y la Sede Central vuelvan a ser visibles
+            const burbujasNacionales = peruMapChart.get('burbujas-fuera-plazo');
+            if (burbujasNacionales) {
+                burbujasNacionales.setVisible(true, false);
+            }
+
+            const sedeCentral = peruMapChart.get('sede-central');
+            if (sedeCentral) {
+                sedeCentral.setVisible(true, false);
+            }
+
+            // 4. RECARGAR VISTA AAA
+            // Al llamar a PlotearGrafico, se reconstruye el mapa con las coordenadas y series originales
+            PlotearGrafico(); 
+            
+            console.log("Mapa reseteado a nivel Nacional (AAA)");
         });
     }
-
 
 
     const getKpiVal = () => (Math.random() * (20 - 10) + 10).toFixed(1) + 'K';
@@ -1807,20 +1870,65 @@ async function PlotearGrafico() {
 
         // Extraemos las propiedades de cada feature para tener el nombre completo y el romano
         const dataAAA = geojsonAAA.features.map(f => {
-        const total = Math.floor(Math.random() * 250000) + 10000;
-        const atendidosTiempo = Math.floor(total * 0.75);
-        const atendidosFuera = Math.floor(total * 0.15);
-        const pendientes = total - (atendidosTiempo + atendidosFuera);
+            const total = Math.floor(Math.random() * 250000) + 10000;
+            const atendidosTiempo = Math.floor(total * 0.75);
+            const atendidosFuera = Math.floor(total * 0.15);
+            const pendientes = total - (atendidosTiempo + atendidosFuera);
 
-        return {
-            COD_ROMAN: f.properties.COD_ROMAN, // Se usa para el joinBy del mapa
-            NAME_AAA: f.properties.NAME_AAA,   // <--- ESTO ES LO QUE APARECERÁ EN LA TABLA
-            value: total,
-            atendidosTiempo: atendidosTiempo,
-            atendidosFuera: atendidosFuera,
-            pendientes: pendientes
-        };
-    });
+            return {
+                COD_ROMAN: f.properties.COD_ROMAN, // Se usa para el joinBy del mapa
+                NAME_AAA: f.properties.NAME_AAA,   // <--- ESTO ES LO QUE APARECERÁ EN LA TABLA
+                value: total,
+                atendidosTiempo: atendidosTiempo,
+                atendidosFuera: atendidosFuera,
+                pendientes: pendientes
+            };
+        });
+
+        const valorFueraSede = 40000;
+
+        // 1. Calcular el total nacional de 'atendidosFuera' para sacar porcentajes
+        const totalFueraNacional = dataAAA.reduce((acc, curr) => acc + curr.atendidosFuera, 0) + 285000; // Sumamos la Sede Central también
+
+        // 1. Recalcular el total nacional incluyendo los 40,000 de la Sede Central
+
+
+        // 2. Crear el array de datos para las burbujas
+        const dataBurbujas = [
+            ...dataAAA.map(item => ({
+                COD_ROMAN: item.COD_ROMAN, 
+                z: parseFloat(((item.atendidosFuera / totalFueraNacional) * 100).toFixed(1)),
+                cantidadReal: item.atendidosFuera
+            })),
+            {
+                // IMPORTANTE: Definimos las mismas coordenadas que el mappoint de la Sede
+                name: 'SEDE CENTRAL',
+                x: -78.2, 
+                y: -12.5,
+                z: parseFloat(((valorFueraSede / totalFueraNacional) * 100).toFixed(1)),
+                cantidadReal: valorFueraSede,
+                isSede: true, // Bandera para el tooltip
+                color: 'rgba(255, 77, 77, 0.5)' // Un poco más transparente para ver el cuadrado blanco debajo
+            }
+        ];
+
+
+        // 2. Crear los puntos para los círculos rojos (Fuera de Plazo)
+        const puntosFueraPlazo = geojsonAAA.features.map(f => {
+            const infoAAA = dataAAA.find(d => d.COD_ROMAN === f.properties.COD_ROMAN);
+            
+            // Calculamos el % respecto al total nacional
+            const porcentaje = ((infoAAA.atendidosFuera / totalFueraNacional) * 100).toFixed(2);
+
+            return {
+                name: infoAAA.NAME_AAA,
+                lat: f.properties.LAT, // Asegúrate que tu GeoJSON tenga estas coordenadas o usa highcharts-center
+                lon: f.properties.LON,
+                value: infoAAA.atendidosFuera,
+                percentage: porcentaje,
+                z: parseFloat(porcentaje) // El tamaño del círculo dependerá del %
+            };
+        });
 
 
 
@@ -1857,7 +1965,7 @@ async function PlotearGrafico() {
                 pointFormatter: function () {
                     const nombre = this.properties ? this.properties.NAME_AAA : this.name;
                     return `<span style="color:#d633ff; font-weight:bold; font-size:1.1em;">${nombre}</span><br/>` +
-                           `<span style="color:#9aa4c7;">Cantidad:</span> <b>${this.value.toLocaleString()}</b> expedientes`;
+                           `<span style="color:#9aa4c7;">Cantidad:</span> <b>${this.value.toLocaleString()}</b> expedientes ingresados`;
                 }
             },
             plotOptions: {
@@ -1894,6 +2002,7 @@ async function PlotearGrafico() {
                 }
             },
             series: [
+                
                 {
                     id: 'serie-aaa',
                     data: dataAAA,
@@ -1903,14 +2012,79 @@ async function PlotearGrafico() {
                     zIndex: 1
                 },
                 {
+                    type: 'mapbubble',
+                    id: 'burbujas-fuera-plazo',
+                    name: '% Fuera de Plazo Nacional',
+                    joinBy: ['COD_ROMAN', 'COD_ROMAN'],
+                    data: dataBurbujas,
+                    minSize: '3%',
+                    maxSize: '12%',
+                    zIndex: 10,
+                    
+                    // --- SOLUCIÓN AL COLOR ---
+                    color: '#ff4d4d', // Rojo sólido
+                    fillColor: 'rgba(255, 77, 77, 0.6)', // Relleno con transparencia
+                    
+                    // --- SOLUCIÓN A LAS LÍNEAS (IMPORTANTE) ---
+                    lineWidth: 0, 
+                    lineColor: 'transparent', 
+                    
+                    marker: {
+                        fillColor: 'rgba(255, 77, 77, 0.6)',
+                        lineColor: '#ff4d4d',
+                        lineWidth: 1,
+                        states: {
+                            hover: {
+                                fillColor: '#ff4d4d',
+                                lineWidth: 2
+                            }
+                        }
+                    },
+                    tooltip: {
+                        pointFormatter: function () {
+                            // 1. Determinar el título (Nombre vs Sede)
+                            let titulo = "";
+                            
+                            if (this.isSede) {
+                                titulo = "SEDE CENTRAL - ANA";
+                            } else {
+                                // Buscamos el nombre real. Intentamos primero en el punto, 
+                                // si no, lo buscamos en los datos de la serie principal del mapa.
+                                titulo = this.NAME_AAA || 
+                                        (this.properties && this.properties.NAME_AAA) || 
+                                        this.COD_ROMAN; // Fallback al romano si no encuentra el nombre
+                            }
+
+                            return `<span style="color:#ff4d4d; font-weight:bold; font-size:1.1em;">${titulo}</span><br/>` +
+                                `<span style="color:#9aa4c7;">Fuera de Plazo:</span> <b>${this.cantidadReal.toLocaleString()}</b><br/>` +
+                                `<div style="margin-top:5px;"><span style="color:#fff; background:#ff4d4d; padding:2px 5px; border-radius:3px;">${this.z}% del Total del País</span></div>`;
+                        }
+                    },
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function () {
+                            // Si el punto es la Sede Central (usando la bandera isSede que agregamos), 
+                            // devolvemos null para que no se renderice el texto.
+                            if (this.point.isSede) {
+                                return null;
+                            }
+                            // Para el resto de burbujas, mostramos el porcentaje normalmente
+                            return this.point.z + '%';
+                        },
+                        style: { color: '#ff4d4d', textOutline: 'none', fontSize: '10px' }
+                    }
+                },
+                {
                     type: 'mappoint',
-                    name: 'Sede Central',
                     id: 'sede-central',
-                    zIndex: 5,
+                    name: 'Sede Central',
+                    zIndex: 50, // Mucho más alto que las burbujas (10) y el mapa (1)
+                    stickyTracking: false, // Evita que "atrape" el mouse desde lejos
                     data: [{
                         name: 'SEDE CENTRAL - ANA',
-                        x: -77.0282, 
-                        y: -12.0431,
+                        // Movido más a la izquierda (oeste) y abajo (sur) para salir del área de la burbuja
+                        x: -78.2, 
+                        y: -12.5, 
                         id: 'sede-central',
                         value: 285000, 
                         atendidosTiempo: 210000,
@@ -1918,29 +2092,56 @@ async function PlotearGrafico() {
                         pendientes: 35000
                     }],
                     color: '#00f2fe',
-                    marker: { symbol: 'square', radius: 10, lineWidth: 2, lineColor: '#ffffff' },
+                    marker: { 
+                        symbol: 'square', 
+                        radius: 8, 
+                        lineWidth: 2, 
+                        lineColor: '#ffffff',
+                        states: {
+                            hover: {
+                                radius: 10,
+                                lineColor: '#d633ff'
+                            }
+                        }
+                    },
+                    // Añadimos un conector visual (opcional) para indicar que ese punto es Lima
+                    dataLabels: {
+                        enabled: true,
+                        format: 'SEDE CENTRAL',
+                        align: 'right',
+                        x: -15, // Desplaza el texto a la izquierda del punto
+                        style: { 
+                            color: '#00f2fe', 
+                            textOutline: '1px black', 
+                            fontSize: '10px',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    // --- AGREGAMOS ESTA SECCIÓN ---
                     point: {
                         events: {
                             click: function() {
+                                // 1. Llamar al detalle visual de la cabecera
                                 showDeptDetail(this);
-                                // Opcional: Podrías mostrar solo la sede central en la tabla
-                                actualizarTablaDesglose("Sede Central", [this], true);
 
-
-                                                    // Cambiamos el label del contenedor
+                                // 2. Cambiar el texto del contenedor de la lista
                                 const containerLabel = document.querySelector('#dept-ala-list-container small');
                                 if (containerLabel) containerLabel.innerText = "DESGLOSE SEDE CENTRAL: DIRECCIONES";
 
-                                // Pasamos los datos reales del punto (this) para dividirlos
+                                // 3. Renderizar la tabla con la división proporcional por oficinas
                                 renderOfficeTableInSidebar(this);
 
-                                document.getElementById('btn-reset-map').style.display = 'block';
+                                // 4. Mostrar el botón para regresar al mapa nacional
+                                const btnReset = document.getElementById('btn-reset-map');
+                                if (btnReset) btnReset.style.display = 'block';
                             }
                         }
                     }
                 }
             ]
         });
+
+        peruMapChart.reflow();
 
         // --- VISTA INICIAL DE LA TABLA ---
         // Combinamos AAA + Sede Central para el resumen nacional
@@ -1994,108 +2195,201 @@ function vincularFiltrosMapa() {
         }
     });
 }
-// 3. Función para actualizar SOLO los datos sin reconstruir todo el mapa
 function ActualizarDatosMapa() {
     if (!peruMapChart) return;
 
-    // 1. Obtener valores de los filtros
     const selectedYear = document.getElementById('yearFilter').value;
     const selectedType = document.getElementById('mapFilter').value;
+
     
-    // 2. Determinar en qué nivel estamos (AAA o ALA)
+
+  
+    // Determinar nivel actual
     const esNivelALA = document.getElementById('btn-reset-map').style.display === 'block';
 
     if (esNivelALA) {
-        // Actualizar datos del desglose ALA actual
+        // --- LÓGICA NIVEL ALA ---
         const featuresVisibles = peruMapChart.series[0].options.chart.map.features;
         const nombresALA = featuresVisibles.map(f => f.properties.NAME_ALA);
+        
+        // 1. Obtener nuevos datos (reemplazar generarDatosFicticios con tu lógica real)
         const nuevosDatosALA = generarDatosFicticios(nombresALA, 'NAME_ALA');
         
-        peruMapChart.series[0].setData(nuevosDatosALA);
+        // 2. Calcular total regional para las burbujas
+        const totalFueraRegion = nuevosDatosALA.reduce((acc, curr) => acc + (curr.atendidosFuera || 0), 0);
+        
+        // 3. Preparar puntos para la serie de burbujas local
+        const nuevosPuntosBurbujaALA = nuevosDatosALA.map(d => ({
+            NAME_ALA: d.NAME_ALA,
+            z: totalFueraRegion > 0 ? parseFloat(((d.atendidosFuera / totalFueraRegion) * 100).toFixed(1)) : 0,
+            cantidadReal: d.atendidosFuera,
+            value: d.value
+        }));
+
+        // 4. Actualizar series (Mapa Base y Burbujas)
+        peruMapChart.get('serie-aaa').setData(nuevosDatosALA);
+        
+        const serieBurbujasALA = peruMapChart.get('burbujas-ala');
+        if (serieBurbujasALA) {
+            serieBurbujasALA.setData(nuevosPuntosBurbujaALA);
+        }
+
+        // Actualizar tabla (Nivel ALA)
+        actualizarTablaDesglose(document.getElementById('dept-title').innerText, nuevosDatosALA, true);
+
     } else {
-        // 1. Mapear nuevos datos AAA
+        // --- LÓGICA NIVEL NACIONAL (AAA) ---
         let nuevosDatosAAA = geojsonGlobalAAA.features.map(f => ({
             COD_ROMAN: f.properties.COD_ROMAN,
             NAME_AAA: f.properties.NAME_AAA,
             value: Math.floor(Math.random() * 250000) + 10000,
-            atendidosTiempo: 0, // ... tus cálculos
-            atendidosFuera: 0,
-            pendientes: 0
+            atendidosTiempo: Math.floor(Math.random() * 5000), 
+            atendidosFuera: Math.floor(Math.random() * 2000),
+            pendientes: Math.floor(Math.random() * 1000)
         }));
 
-        // 2. Traer la Sede Central actual del gráfico
-        const sede = peruMapChart.get('sede-central').points[0];
+        const sedePunto = peruMapChart.get('sede-central') ? peruMapChart.get('sede-central').points[0] : {value:0, atendidosFuera:0};
+        const valorSedeActual = 40000; // Valor que traigas de tus filtros
+
         const objetoSede = {
             name: 'SEDE CENTRAL',
-            value: sede.value,
-            atendidosTiempo: sede.atendidosTiempo,
-            atendidosFuera: sede.atendidosFuera,
-            pendientes: sede.pendientes
+            value: valorSedeActual,
+            atendidosFuera: 5000, // Ejemplo
+            // ... resto de campos
         };
 
-        // 3. Unir y Ordenar
         const dataFinal = [objetoSede, ...nuevosDatosAAA].sort((a, b) => {
             if (a.name === 'SEDE CENTRAL') return -1;
             if (b.name === 'SEDE CENTRAL') return 1;
             return (a.NAME_AAA || "").localeCompare(b.NAME_AAA || "");
         });
 
-        // 4. Actualizar Mapa y Tabla
-        peruMapChart.get('serie-aaa').setData(nuevosDatosAAA); // El mapa solo recibe las AAA
-        actualizarTablaDesglose("Nacional", dataFinal, false); // La tabla recibe todo ordenado
+        // Actualizar Mapa Base AAA
+        peruMapChart.get('serie-aaa').setData(nuevosDatosAAA);
+        
+        // Actualizar Burbujas Nacionales
+        const totalFueraNacional = nuevosDatosAAA.reduce((acc, curr) => acc + curr.atendidosFuera, 0) + objetoSede.atendidosFuera;
+        
+        const nuevosPuntosBurbuja = [
+            ...nuevosDatosAAA.map(d => ({
+                COD_ROMAN: d.COD_ROMAN,
+                z: parseFloat(((d.atendidosFuera / totalFueraNacional) * 100).toFixed(1)),
+                cantidadReal: d.atendidosFuera
+            })),
+            {
+                name: 'SEDE CENTRAL',
+                x: -78.2, 
+                y: -12.5,
+                z: parseFloat(((objetoSede.atendidosFuera / totalFueraNacional) * 100).toFixed(1)),
+                cantidadReal: objetoSede.atendidosFuera,
+                isSede: true
+            }
+        ];
+
+        peruMapChart.get('burbujas-fuera-plazo').setData(nuevosPuntosBurbuja);
+        actualizarTablaDesglose("Nacional", dataFinal, false);
     }
     
-    console.log(`Mapa actualizado para: ${selectedYear} | Filtro: ${selectedType}`);
+    console.log(`Mapa actualizado: ${selectedYear} | Nivel: ${esNivelALA ? 'ALA' : 'AAA'}`);
 }
-
 function MostrarAmbitoALA(nombreAAA, geojsonFiltrado, dataALA) {
     document.getElementById('dept-title').innerText = nombreAAA;
-    
-    // 1. Ocultar la Sede Central antes de actualizar el mapa
-    const sede = peruMapChart.get('sede-central');
-    if (sede) sede.setVisible(false, false); //
 
+    // 1. Ocultar burbujas nacionales y Sede Central
+    const burbujasNacionales = peruMapChart.get('burbujas-fuera-plazo');
+    if (burbujasNacionales) burbujasNacionales.setVisible(false);
+    
+    const sede = peruMapChart.get('sede-central');
+    if (sede) sede.setVisible(false, false);
+
+    // 2. CALCULAR DATOS PARA BURBUJAS NIVEL ALA
+    const totalFueraRegion = dataALA.reduce((acc, curr) => acc + (curr.atendidosFuera || 0), 0);
+
+    const dataBurbujasALA = dataALA.map(item => ({
+        NAME_ALA: item.NAME_ALA,
+        z: totalFueraRegion > 0 ? parseFloat(((item.atendidosFuera / totalFueraRegion) * 100).toFixed(1)) : 0,
+        cantidadReal: item.atendidosFuera,
+        value: item.value 
+    }));
+
+    // 3. ACTUALIZACIÓN GLOBAL DEL GRÁFICO
     peruMapChart.update({
-        chart: { map: geojsonFiltrado },
+        chart: { 
+            map: geojsonFiltrado // Cambiamos el mapa base para el cálculo de ejes
+        },
         subtitle: { text: `Desglose: Administraciones Locales del Agua (ALA) - ${nombreAAA}` },
         
-        // CONFIGURACIÓN DEL TOOLTIP PARA ALA
         tooltip: {
             backgroundColor: 'rgba(26, 34, 63, 0.9)',
             style: { color: '#ffffff' },
             borderWidth: 1,
-            borderColor: '#00f2fe', // Borde Cian para nivel 2
+            borderColor: '#00f2fe',
             headerFormat: '',
+            useHTML: true,
             pointFormatter: function () {
-                return `<span style="color:#00f2fe; font-weight:bold; font-size:1.1em;">${this.properties.NAME_ALA}</span><br/>` +
-                       `<span style="color:#9aa4c7;">Cantidad:</span> <b>${this.value.toLocaleString()}</b> expedientes`;
+                const nombre = this.NAME_ALA || this.properties.NAME_ALA;
+                const infoReal = dataALA.find(d => d.NAME_ALA === nombre);
+                if (!infoReal) return `<b>${nombre}</b>`;
+
+                return `<span style="color:#00f2fe; font-weight:bold; font-size:1.1em;">${nombre}</span><br/>` +
+                       `<span style="color:#9aa4c7;">Cantidad Total:</span> <b>${infoReal.value.toLocaleString()}</b> expedientes<br/>` +
+                       `<span style="color:#ff4d4d;">Fuera de Plazo:</span> <b>${infoReal.atendidosFuera.toLocaleString()}</b>`;
             }
         },
 
-        series: [{
-            id: 'serie-aaa', // Reutilizamos el ID o Highcharts actualizará la serie 0 por defecto
-            data: dataALA,
-            joinBy: ['NAME_ALA', 'NAME_ALA'],
-            name: 'Expedientes ALA',
-            dataLabels: {
-                enabled: true,
-                format: '{point.properties.NAME_ALA}',
-                style: { 
-                    fontSize: '9px', 
-                    color: '#fff', 
-                    textOutline: 'none',
-                    fontWeight: 'normal' 
+        series: [
+            {
+                id: 'serie-aaa',
+                data: dataALA,
+                mapData: geojsonFiltrado, // Necesario para el zoom correcto
+                joinBy: ['NAME_ALA', 'NAME_ALA'],
+                name: 'Expedientes ALA',
+                zIndex: 1, 
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.properties.NAME_ALA}',
+                    style: { 
+                        fontSize: '9px', 
+                        color: '#fff', 
+                        textOutline: 'none',
+                        fontWeight: 'normal' 
+                    }
+                }
+            },
+            {
+                type: 'mapbubble',
+                id: 'burbujas-ala',
+                name: '% Fuera de Plazo Regional',
+                joinBy: ['NAME_ALA', 'NAME_ALA'],
+                mapData: geojsonFiltrado, // ¡ESTO HACE QUE SE VEAN LAS BURBUJAS!
+                data: dataBurbujasALA,
+                minSize: '6%', // Un poco más grandes para que se vean mejor en zoom
+                maxSize: '18%',
+                zIndex: 10, 
+                color: '#ff4d4d',
+                fillColor: 'rgba(255, 77, 77, 0.6)',
+                lineWidth: 0, 
+                lineColor: 'transparent',
+                marker: {
+                    fillOpacity: 0.6,
+                    lineWidth: 1,
+                    lineColor: '#ff4d4d'
                 }
             }
-        }]
-    });
+        ]
+    }, true, true); // Forzamos redibujado completo (redraw + animation)
+
+    // 4. FORZAR ZOOM Y RE-AJUSTE
+    // Esperamos un instante a que el mapa procese las nuevas coordenadas
+    setTimeout(() => {
+        peruMapChart.mapZoom(); // Ajusta la cámara al contenido actual (la región)
+        peruMapChart.reflow();  // Asegura que use todo el ancho del DIV
+    }, 150);
     
     if (typeof actualizarGraficosRelacionados === "function") {
         actualizarGraficosRelacionados();
     }
 }
-
-
 function renderALATable(codRoman) {
 
     const listBody = document.getElementById('ala-list-body');
@@ -2183,10 +2477,10 @@ function actualizarTablaDesglose(titulo, listaDatos, esNivelALA = false) {
                 <td class="text-end py-2 text-success">
                     ${(item.atendidosTiempo || 0).toLocaleString()}
                 </td>
-                <td class="text-end py-2 text-warning">
+                <td class="text-end py-2 text-danger">
                     ${(item.atendidosFuera || 0).toLocaleString()}
                 </td>
-                <td class="text-end py-2 text-danger">
+                <td class="text-end py-2 text-warning">
                     ${(item.pendientes || 0).toLocaleString()}
                 </td>
             </tr>`;
@@ -2226,8 +2520,8 @@ function renderOfficeTableInSidebar(sedeData) {
             </td>
             <td class="text-end py-2 fw-bold">${totalDir.toLocaleString()}</td>
             <td class="text-end py-2 text-success">${atendidosTpoDir.toLocaleString()}</td>
-            <td class="text-end py-2 text-warning">${atendidosFueraDir.toLocaleString()}</td>
-            <td class="text-end py-2 text-danger">${pendientesDir.toLocaleString()}</td>
+            <td class="text-end py-2 text-danger">${atendidosFueraDir.toLocaleString()}</td>
+            <td class="text-end py-2 text-warning">${pendientesDir.toLocaleString()}</td>
         `;
 
         if (hasChildren) {
@@ -2249,13 +2543,101 @@ function renderOfficeTableInSidebar(sedeData) {
                     <td class="py-1 ps-4 small">└ ${sub}</td>
                     <td class="text-end py-1 small">${totalSub.toLocaleString()}</td>
                     <td class="text-end py-1 small text-success">${Math.round(atendidosTpoDir / numChildren).toLocaleString()}</td>
-                    <td class="text-end py-1 small text-warning">${Math.round(atendidosFueraDir / numChildren).toLocaleString()}</td>
-                    <td class="text-end py-1 small text-danger">${Math.round(pendientesDir / numChildren).toLocaleString()}</td>
+                    <td class="text-end py-1 small text-danger">${Math.round(atendidosFueraDir / numChildren).toLocaleString()}</td>
+                    <td class="text-end py-1 small text-warning">${Math.round(pendientesDir / numChildren).toLocaleString()}</td>
                 `;
                 tbody.appendChild(subRow);
             });
         }
     });
+}
+
+// 1. Configuración base mejorada
+const gaugeOptions = {
+    chart: {
+        type: 'solidgauge',
+        backgroundColor: 'transparent',
+        margin: [20, 20, 20, 20] // Añadimos margen para que no se corte
+    },
+    title: null, // ELIMINAMOS EL TÍTULO DE AQUÍ
+    credits: { enabled: false }, // Quita el texto de highcharts.com abajo
+    exporting: { enabled: false }, // Quita el botón de menú de la esquina
+    pane: {
+        center: ['50%', '85%'], // Bajamos un poco el centro
+        size: '110%', // Aumentamos tamaño
+        startAngle: -90,
+        endAngle: 90,
+        background: {
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
+            innerRadius: '60%',
+            outerRadius: '100%',
+            shape: 'arc',
+            borderWidth: 0
+        }
+    },
+    yAxis: {
+        lineWidth: 0,
+        tickPositions: [],
+        minorTickInterval: null,
+        labels: { show: false }
+    },
+    plotOptions: {
+        solidgauge: {
+            dataLabels: {
+                y: -25, // Subimos el número para que no choque con el borde
+                borderWidth: 0,
+                useHTML: true,
+                format: '<div style="text-align:center"><span style="font-size:30px; color:#fff; font-weight:bold; font-family:sans-serif;">{y}%</span></div>'
+            },
+            rounded: true
+        }
+    }
+};
+
+// 2. Inicializar Eficiencia (Cian)
+chartEficiencia = Highcharts.chart('gauge-eficiencia', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: 0,
+        max: 100,
+        stops: [
+            [0.1, '#00f2fe'] // Color único cian para que todo el arco sea neón
+        ]
+    },
+    series: [{
+        name: 'Eficiencia',
+        data: [94],
+    }]
+}));
+
+// 3. Inicializar Celeridad (Púrpura/Magenta)
+chartCeleridad = Highcharts.chart('gauge-celeridad', Highcharts.merge(gaugeOptions, {
+    yAxis: {
+        min: 0,
+        max: 100,
+        stops: [
+            [0.1, '#d633ff'] // Color único magenta para consistencia
+        ]
+    },
+    series: [{
+        name: 'Celeridad',
+        data: [72],
+    }]
+}));
+
+function actualizarTacometrosConFicticios() {
+    // Generamos valores aleatorios para simular el cambio de datos por año
+    const randomEficiencia = Math.floor(Math.random() * (98 - 75 + 1)) + 75;
+    const randomCeleridad = Math.floor(Math.random() * (92 - 60 + 1)) + 60;
+
+    // Actualizamos los objetos de Highcharts
+    // Usamos el método .update() para que la aguja se deslice con animación
+    if (window.chartEficiencia && window.chartEficiencia.series[0]) {
+        window.chartEficiencia.series[0].points[0].update(randomEficiencia);
+    }
+    
+    if (window.chartCeleridad && window.chartCeleridad.series[0]) {
+        window.chartCeleridad.series[0].points[0].update(randomCeleridad);
+    }
 }
 </script>
 
