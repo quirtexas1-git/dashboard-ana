@@ -1126,9 +1126,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Escuchar cambios en el filtro de meses propio
     document.getElementById('officeMonthFilter').addEventListener('change', renderOfficeTable);
     // También debe reaccionar al cambio de año global
-    
-    
-    
+        
         // Listener para el Cambio de Año
     document.getElementById('yearFilter').addEventListener('change', () => {
         initOfficeMonthFilter();
@@ -1137,6 +1135,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ActualizarDatosMapa();
         // ESTO ES LO QUE HACER QUE SE MUEVAN LOS TACÓMETROS:
         actualizarTacometrosConFicticios();
+        updateSlaChart();
     });
     // Listener para el Filtro del Mapa (TUPA / NO TUPA)
     document.getElementById('mapFilter').addEventListener('change', () => {
